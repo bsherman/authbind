@@ -72,6 +72,7 @@ int main(int argc, const char *const *argv) {
   if (argc != 3) badusage(); 
   addr= strtoul(argv[1],&ep,16); if (*ep || addr&~0x0ffffffffUL) badusage();
   port= strtoul(argv[2],&ep,16); if (*ep || port&~0x0ffffUL) badusage();
+  if (port >= IPPORT_RESERVED/2) _exit(EPERM);
 
   if (chdir(CONFIGDIR)) perrorfail("chdir " CONFIGDIR);
 

@@ -54,7 +54,7 @@ install:		$(TARGETS)
 		install -o root -g root -m 755 -s authbind $(bin_dir)/.
 		install -o root -g root -m 755 $(LIBTARGET) $(lib_dir)/.
 		strip --strip-unneeded $(lib_dir)/$(LIBTARGET)
-		ln -s $(LIBTARGET) $(lib_dir)/$(LIBCANON)
+		ln -sf $(LIBTARGET) $(lib_dir)/$(LIBCANON)
 		install -o root -g root -m 4755 -s helper $(lib_dir)/.
 		install -o root -g root -m 755 -d $(etc_dir) \
 			$(etc_dir)/byport $(etc_dir)/byaddr $(etc_dir)/byuid

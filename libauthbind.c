@@ -80,7 +80,7 @@ int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
   int status;
   
   if (addr->sa_family != AF_INET || addrlen != sizeof(struct sockaddr_in) ||
-      ntohs(((struct sockaddr_in*)addr)->sin_port) >= 1024 || !geteuid())
+      ntohs(((struct sockaddr_in*)addr)->sin_port) >= IPPORT_RESERVED/2 || !geteuid())
     return old_bind(fd,addr,addrlen);
 
   if (getenv(AUTHBIND_NESTED_VAR)) {

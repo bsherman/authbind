@@ -35,7 +35,7 @@ You must invoke the program using
 will set up some environment variables, including an
 .BR LD_PRELOAD ,
 which will allow the program (including any subprocesses it may run)
-to bind to low-numbered (<1024) ports if the system is configured to
+to bind to low-numbered (<512) ports if the system is configured to
 allow this.
 .SH ACCESS CONTROL
 Access to low numbered ports is controlled by permissions and contents
@@ -200,6 +200,11 @@ to happen and
 .B SIGCHLD
 signal to be delivered.  Programs should not rely on standard
 libraries not doing these things.
+.PP
+Ports from 512 to 1023 inclusive cannot be used with
+.B authbind
+because that would create a security hole, in conjection with
+.BR rshd .
 .PP
 The access control configuration scheme is somewhat strange.
 .SH FILES AND ENVIRONMENT VARIABLES
