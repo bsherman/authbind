@@ -40,13 +40,11 @@ typedef int bindfn_type(int fd, const struct sockaddr *addr, socklen_t addrlen);
 #define STDERRSTR_CONST(m) write(2,m,sizeof(m)-1)
 #define STDERRSTR_STRING(m) write(2,m,strlen(m))
 
-static int find_any(const char *name, anyfn_type **keep) {
+static anyfn_type *find_any(const char *name) {
   static const char *dlerr;
   anyfn_type *kv;
 
-  if (*keep) return 0;
-  kv= dlsym(RTLD_NEXT,name);
-  if (kv) { *keep= kv; return 0; }
+  kv= dlsym(RTLD_NEXT,name); if (kv) return kv;
   dlerr= dlerror(); if (!dlerr) dlerr= "dlsym() failed for no reason";
   STDERRSTR_CONST("libauthbind: error finding original version of ");
   STDERRSTR_STRING(name);
@@ -54,14 +52,14 @@ static int find_any(const char *name, anyfn_type **keep) {
   STDERRSTR_STRING(dlerr);
   STDERRSTR_STRING("\n");
   errno= ENOSYS;
-  return -1;
+  return 0;
 }
 
 static bindfn_type find_bind, *old_bind= find_bind;
 
 int find_bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
   anyfn_type *anyfn;
-  if (find_any("bind",&anyfn)) return -1;
+  anyfn= find_any("bind"); if (!anyfn) return -1;
   old_bind= (bindfn_type*)anyfn;
   return old_bind(fd,addr,addrlen);
 }
