@@ -72,7 +72,8 @@ int main(int argc, const char *const *argv) {
   if (argc != 3) badusage(); 
   addr= strtoul(argv[1],&ep,16); if (*ep || addr&~0x0ffffffffUL) badusage();
   port= strtoul(argv[2],&ep,16); if (*ep || port&~0x0ffffUL) badusage();
-  if (port >= IPPORT_RESERVED/2) _exit(EPERM);
+  hport= htons(port);
+  if (hport >= IPPORT_RESERVED/2) _exit(EPERM);
 
   if (chdir(CONFIGDIR)) perrorfail("chdir " CONFIGDIR);
 
@@ -81,7 +82,6 @@ int main(int argc, const char *const *argv) {
   saddr.sin_family= AF_INET;
   saddr.sin_port= port;
   saddr.sin_addr.s_addr= addr;
-  hport= htons(port);
 
   snprintf(fnbuf,sizeof(fnbuf)-1,"byport/%u",hport);
   if (!access(fnbuf,X_OK)) authorised();
