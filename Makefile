@@ -37,7 +37,8 @@ CFLAGS=		-g $(OPTIMISE) \
 		-Wnested-externs -Wmissing-prototypes -Wstrict-prototypes
 CPPFLAGS=	-DMAJOR_VER='"$(MAJOR)"' -DMINOR_VER='"$(MINOR)"' \
 		-DLIBAUTHBIND='"$(lib_dir)/$(LIBCANON)"' \
-		-DHELPER='"$(lib_dir)/helper"' -DCONFIGDIR='"$(etc_dir)"'
+		-DHELPER='"$(lib_dir)/helper"' -DCONFIGDIR='"$(etc_dir)"' \
+		-D_GNU_SOURCE
 
 MAJOR=1
 MINOR=0
