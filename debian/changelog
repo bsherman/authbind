@@ -1,3 +1,9 @@
+authbind (1.1) experimental; urgency=low
+
+  * Allow control of when the LD_PRELOAD is passed on.
+
+ -- Ian Jackson <ian@davenant.greenend.org.uk>  Sun, 30 Aug 1998 16:18:24 +0100
+
 authbind (1.0) experimental; urgency=low
 
   * Following testing, we can call this 1.0.

@@ -32,11 +32,7 @@
 
 static const char *rcsid="$Id$";
 
-#ifndef HELPER
-# define HELPER "/usr/local/lib/authbind/helper"
-#endif
-
-#define AUTHBIND_NESTED_VAR "AUTHBIND_NESTED"
+#include "authbind.h"
 
 typedef void anyfn_type(void);
 typedef int bindfn_type(int fd, const struct sockaddr *addr, socklen_t addrlen);
@@ -74,22 +70,87 @@ static int exiterrno(int e) {
   _exit(e>0 && e<128 ? e : -1);
 }
 
+static void removepreload(void) {
+  const char *myself, *found;
+  char *newval, *preload;
+  int lpreload, lmyself, before, after;
+
+  preload= getenv(PRELOAD_VAR);
+  myself= getenv(AUTHBINDLIB_VAR);
+  if (!myself || !preload) return;
+
+  lpreload= strlen(preload);
+  lmyself= strlen(myself);
+
+  if (lmyself < 1 || lpreload<lmyself) return;
+  if (lpreload==lmyself) {
+    if (!strcmp(preload,myself)) unsetenv(PRELOAD_VAR);
+    return;
+  }
+  if (!memcmp(preload,myself,lmyself) && preload[lmyself]==':') {
+    before= 0; after= lpreload-(lmyself+1);
+  } else if (!memcmp(preload+lpreload-lmyself,myself,lmyself) &&
+	     preload[lpreload-(lmyself+1)]==':') {
+    before= lpreload-(lmyself+1); after= 0;
+  } else {
+    if (lpreload<lmyself+2) return;
+    found= preload+1;
+    for (;;) {
+      found= strstr(found,myself); if (!found) return;
+      if (found > preload+lpreload-(lmyself+1)) return;
+      if (found[-1]==':' && found[lmyself]==':') break;
+      found++;
+    }
+    before= found-preload;
+    after= lpreload-(before+lmyself+1);
+  }
+  newval= malloc(before+after+1);
+  if (newval) {
+    memcpy(newval,preload,before);
+    strcpy(newval+before,preload+lpreload-after);
+    if (setenv(PRELOAD_VAR,newval,1)) return;
+    free(newval);
+  }
+  strcpy(preload+before,preload+lpreload-after);
+  return;
+}
+
+int _init(void);
+int _init(void) {
+  char *levels;
+  int levelno;
+
+  /* If AUTHBIND_LEVELS is
+   *  unset => always strip from preload
+   *  set and starts with `y' => never strip from preload, keep AUTHBIND_LEVELS
+   *  set to integer > 1 => do not strip now, subtract one from AUTHBIND_LEVELS
+   *  set to integer 1 => do not strip now, unset AUTHBIND_LEVELS
+   *  set to empty string or 0 => strip now, unset AUTHBIND_LEVELS
+   */
+  levels= getenv(AUTHBIND_LEVELS_VAR);
+  if (levels) {
+    if (levels[0]=='y') return 0;
+    levelno= atoi(levels);
+    if (levelno > 0) {
+      levelno--;
+      if (levelno > 0) sprintf(levels,"%d",levelno);
+      else unsetenv(AUTHBIND_LEVELS_VAR);
+      return 0;
+    }
+    unsetenv(AUTHBIND_LEVELS_VAR);
+  }
+  removepreload();
+  return 0;
+}
+
 int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
   pid_t child, rchild;
   char portarg[5], addrarg[9];
   int status;
-  
+
   if (addr->sa_family != AF_INET || addrlen != sizeof(struct sockaddr_in) ||
       ntohs(((struct sockaddr_in*)addr)->sin_port) >= IPPORT_RESERVED/2 || !geteuid())
     return old_bind(fd,addr,addrlen);
-
-  if (getenv(AUTHBIND_NESTED_VAR)) {
-    STDERRSTR_CONST("libauthbind: possible installation problem - "
-		    "nested invocation, perhaps helper is not setuid\n ");
-    STDERRSTR_STRING(rcsid);
-    STDERRSTR_CONST("\n");
-    return old_bind(fd,addr,addrlen);
-  }
 
   sprintf(addrarg,"%08lx",
 	  ((unsigned long)(((struct sockaddr_in*)addr)->sin_addr.s_addr))&0x0ffffffffUL);
@@ -100,11 +161,13 @@ int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
 
   if (!child) {
     if (dup2(fd,0)) exiterrno(errno);
-    if (setenv(AUTHBIND_NESTED_VAR,"1",1)) exiterrno(errno);
+    removepreload();
     execl(HELPER,HELPER,addrarg,portarg,(char*)0);
     status= errno;
     STDERRSTR_CONST("libauthbind: possible installation problem - "
-		    "could not invoke " HELPER "\n");
+		    "could not invoke " HELPER " (");
+    STDERRSTR_STRING(rcsid);
+    STDERRSTR_CONST(")\n");
     exiterrno(status);
   }
 

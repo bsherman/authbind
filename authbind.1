@@ -23,8 +23,8 @@
 .SH NAME 
 authbind \- bind sockets to privileged ports without root
 .SH SYNOPSIS
-.BI authbind " program"
-.RI [ argument " ...]"
+.BR authbind
+.RI [ options "] " program " [" argument " ...]"
 .SH DESCRIPTION
 .B authbind
 allows a program which does not or should not run as root to bind to
@@ -37,6 +37,28 @@ will set up some environment variables, including an
 which will allow the program (including any subprocesses it may run)
 to bind to low-numbered (<512) ports if the system is configured to
 allow this.
+.SH OPTIONS
+.TP
+.B --deep
+Normally,
+.B authbind
+arranges for only the program which it directly invokes to be affected
+by its special version of
+.BR bind (2).
+If you specify
+.B --deep
+then all programs which that program invokes directly or indirectly
+will be affected, so long as they do not unset the environment
+variables set up by
+.BR authbind .
+.TP
+.BI --depth " levels"
+Causes
+.B authbind
+to affect programs which are
+.I levels
+deep in the calling graph.  The default is
+.BR "--depth 1" .
 .SH ACCESS CONTROL
 Access to low numbered ports is controlled by permissions and contents
 of files in a configuration area,
@@ -231,16 +253,31 @@ If set, forces
 .B authbind
 to use its value as the path to the shared library to put in
 .BR LD_PRELOAD ,
-instead of the compiled-in value.
+instead of the compiled-in value.  In any case, unless
+.B --deep
+was specified,
+.B authbind
+will set this variable to the name of the library actually added to
+.BR LD_PRELOAD ,
+so that the library can find and remove the right entry.
 .TP
-.I AUTHBIND_NESTED
-Do not set this variable.  It is set to
-.B 1
-by
-.B libauthbind
-when it invokes the helper program.  This allows detection of the
-situation where the helper has not been installed setuid, which would
-otherwise lead to infinite recursion.
+.I AUTHBIND_LEVELS
+This variable is set by
+.B authbind
+to the number of levels left from the
+.B --depth
+or
+.B --deep
+option, minus one.  It is decremented during
+.B _init
+by the library on each program call, and the library will remove
+itself from the
+.B LD_PRELOAD
+when it reaches zero.  The special value
+.B y
+means
+.B --deep
+was specified.
 .SH SEE ALSO
 .BR bind (2),
 .BR authbind\-helper (8),

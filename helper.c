@@ -48,7 +48,7 @@ static void perrorfail(const char *m) {
 }
 
 static void badusage(void) {
-  fprintf(stderr,"libauthbind's helper: bad usage\n %s\n",rcsid);
+  fprintf(stderr,"libauthbind's helper: bad usage\n (%s)\n",rcsid);
   exit(ENOSYS);
 }
 

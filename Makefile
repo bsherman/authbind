@@ -31,6 +31,7 @@ man8_dir=$(man_dir)/man8
 etc_dir=/etc/authbind
 
 OPTIMISE=	-O2
+LDFLAGS=	-g
 CFLAGS=		-g $(OPTIMISE) \
 		-Wall -Wwrite-strings -Wpointer-arith -Wimplicit \
 		-Wnested-externs -Wmissing-prototypes -Wstrict-prototypes
@@ -63,11 +64,16 @@ install_man:		$(MANPAGES_1) $(MANPAGES_8)
 		install -o root -g root -m 644 $(MANPAGES_1) $(man1_dir)/.
 		install -o root -g root -m 644 $(MANPAGES_8) $(man8_dir)/.
 
-libauthbind.o:		libauthbind.c
+libauthbind.o:		libauthbind.c authbind.h
 		$(CC) -D_REENTRANT $(CFLAGS) $(CPPFLAGS) -c -o $@ -fPIC $<
 
+authbind:		authbind.o
+helper:			helper.o
+
+helper.o authbind.o:	authbind.h
+
 $(LIBTARGET):		libauthbind.o
-		gcc -g -shared -Wl,-soname,$(LIBCANON) -o $@ $< -ldl -lc
+		ld -shared -soname $(LIBCANON) -o $@ $< -ldl -lc
 
 clean distclean:
 		rm -f $(TARGETS) *.o *~ ./#*# *.bak *.new core libauthbind.so*

@@ -23,27 +23,58 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <assert.h>
+
+#include "authbind.h"
 
 static const char *rcsid="$Id$";
 
-#ifndef LIBAUTHBIND
-# define "/usr/local/lib/authbind/libauthbind.so." MAJOR_VER
-#endif
+static void printusage(FILE *f) {
+  if (fprintf(f,
+	      "usage:       authbind [<options>] <program> <arg> <arg> ...\n"
+	      "options:     --deep    --depth <levels>\n"
+	      "version:     " MAJOR_VER "." MINOR_VER "  %s\n",
+	      rcsid) == EOF) { perror("printf usage"); exit(-1); }
+}
 
-#define PRELOAD_VAR "LD_PRELOAD"
-#define AUTHBINDLIB_VAR "AUTHBIND_LIB"
+static void usageerror(const char *msg) {
+  fprintf(stderr,"usage error: %s\n",msg);
+  printusage(stderr);
+  exit(-1);
+}
+
+static void mustsetenv(const char *var, const char *val) {
+  if (setenv(var,val,1)) { perror("authbind: setenv"); exit(-1); }
+}
 
 int main(int argc, char *const *argv) {
   const char *expreload, *authbindlib, *preload;
-  char *newpreload;
+  char *newpreload, *ep;
+  char buf[50];
+  unsigned long depth;
 
-  if (argc<2 || argv[1][0]=='-') {
-    fprintf(stderr,"authbind: usage: authbind program arg arg ...\n %s\n",rcsid);
-    exit(-1);
+  depth= 1;
+  while (argc>1 && argv[1][0]=='-') {
+    argc--; argv++;
+    if (!argv[0][1]) break;
+    if (!strcmp("--deep",argv[0])) { depth= -1; }
+    else if (!strcmp("--depth",argv[0])) {
+      if (argc<=1) usageerror("--depth requires a value");
+      argc--; argv++;
+      depth= strtoul(argv[0],&ep,10);
+      if (*ep || depth<=0 || depth>100) usageerror("--depth value is not valid");
+    } else if (!strcmp("--help",argv[0]) || !strcmp("--help",argv[0])) {
+      printusage(stdout);
+      exit(0);
+    }
   }
+  if (argc<2) usageerror("need program name");
 
   authbindlib= getenv(AUTHBINDLIB_VAR);
-  if (!authbindlib) authbindlib= LIBAUTHBIND;
+  if (!authbindlib) {
+    authbindlib= LIBAUTHBIND;
+    mustsetenv(AUTHBINDLIB_VAR,authbindlib);
+  }
     
   if ((expreload= getenv(PRELOAD_VAR))) {
     newpreload= malloc(strlen(expreload)+strlen(authbindlib)+2);
@@ -54,7 +85,16 @@ int main(int argc, char *const *argv) {
   } else {
     preload= authbindlib;
   }
-  if (setenv(PRELOAD_VAR,preload,1)) { perror("authbind: setenv"); exit(-1); }
+  mustsetenv(PRELOAD_VAR,preload);
+
+  if (depth > 1) {
+    sprintf(buf,"%ld",depth-1);
+    mustsetenv(AUTHBIND_LEVELS_VAR,buf);
+  } else if (depth == -1) {
+    mustsetenv(AUTHBIND_LEVELS_VAR,"y");
+  } else {
+    assert(depth==1);
+  }
 
   execvp(argv[1],argv+1);
   perror(argv[1]); exit(-1);
