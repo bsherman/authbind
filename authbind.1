@@ -205,7 +205,11 @@ means in this context).
 .B authbind
 is ineffective with setuid programs, because they do not honour
 .B LD_PRELOAD
-for security reasons.  Of course a setuid-root program does not need
+references outside the system directories, for security reasons.  (In
+fact, setuid programs should not honour
+.B LD_PRELOAD
+at all.)
+Of course a setuid-root program does not need
 .BR authbind ,
 but it might be useful to apply it to program which are setuid to
 another user or setgid.  If the author or builder of such a programs

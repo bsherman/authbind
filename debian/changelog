@@ -1,7 +1,9 @@
 authbind (1.1.6) unstable; urgency=low
 
   * Do not Build-Depends: libc6-dev (it's build-essential).
-
+  * manpage: fix subtle error in description of interaction between
+    set-id and LD_PRELOAD.  Closes #36890.
+  
  --
 
 authbind (1.1.5.3) unstable; urgency=low
