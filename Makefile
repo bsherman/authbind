@@ -22,6 +22,7 @@ prefix=/usr/local
 
 bin_dir=$(prefix)/bin
 lib_dir=$(prefix)/lib/authbind
+libexec_dir=$(lib_dir)
 
 share_dir=$(prefix)/share
 man_dir=$(share_dir)/man
@@ -36,20 +37,23 @@ INSTALL_DIR=install -o root -g root -m 755 -d
 
 OPTIMISE=	-O2
 LDFLAGS=	-g
+LIBS=		-ldl -lc
 CFLAGS=		-g $(OPTIMISE) \
 		-Wall -Wwrite-strings -Wpointer-arith -Wimplicit \
 		-Wnested-externs -Wmissing-prototypes -Wstrict-prototypes
 CPPFLAGS=	-DMAJOR_VER='"$(MAJOR)"' -DMINOR_VER='"$(MINOR)"' \
 		-DLIBAUTHBIND='"$(lib_dir)/$(LIBCANON)"' \
-		-DHELPER='"$(lib_dir)/helper"' -DCONFIGDIR='"$(etc_dir)"' \
+		-DHELPER='"$(libexec_dir)/$(HELPER)"' -DCONFIGDIR='"$(etc_dir)"' \
 		-D_GNU_SOURCE
 
 MAJOR=1
 MINOR=0
 LIBCANON=	libauthbind.so.$(MAJOR)
 LIBTARGET=	$(LIBCANON).$(MINOR)
+BINTARGETS=	authbind
+HELPER=		helper
 
-TARGETS=		authbind helper $(LIBTARGET)
+TARGETS=		$(BINTARGETS) $(HELPER) $(LIBTARGET)
 MANPAGES_1=		authbind.1
 MANPAGES_8=		authbind-helper.8
 
@@ -57,12 +61,12 @@ all:			$(TARGETS)
 
 install:		$(TARGETS)
 		$(INSTALL_DIR) $(lib_dir) $(man1_dir) $(man8_dir)
-		$(INSTALL_PROGRAM) authbind $(bin_dir)/.
+		$(INSTALL_PROGRAM) $(BINTARGETS) $(bin_dir)/.
 		$(INSTALL_FILE) $(LIBTARGET) $(lib_dir)/.
 		strip --strip-unneeded $(lib_dir)/$(LIBTARGET)
 		ln -sf $(LIBTARGET) $(lib_dir)/$(LIBCANON)
-		$(INSTALL_PROGRAM) helper $(lib_dir)/.
-		chmod u+s $(lib_dir)/helper
+		$(INSTALL_PROGRAM) $(HELPER) $(libexec_dir)/.
+		chmod u+s $(libexec_dir)/$(HELPER)
 		$(INSTALL_DIR) $(etc_dir) \
 			$(etc_dir)/byport $(etc_dir)/byaddr $(etc_dir)/byuid
 
@@ -79,7 +83,8 @@ helper:			helper.o
 helper.o authbind.o:	authbind.h
 
 $(LIBTARGET):		libauthbind.o
-		ld -shared -soname $(LIBCANON) -o $@ $< -ldl -lc
+		ld -shared -soname $(LIBCANON) -o $@ $< $(LIBS)
 
 clean distclean:
-		rm -f $(TARGETS) *.o *~ ./#*# *.bak *.new core libauthbind.so*
+		rm -f $(TARGETS) *.o *~ ./#*# *.bak *.new core
+		rm -f libauthbind.so* *.core

@@ -7,6 +7,9 @@ authbind (1.1.6) unstable; urgency=low
     programs.  See also Bug#186439.
   * Make sure we don't try to encode errno's >127 in a status code.
   * Do not Build-Depends: libc6-dev (it's build-essential).
+  * New make variables for improved portability and customisation of
+    locations: LIBS, libexec_dir, HELPER.
+  * make clean removes *.core too.
 
  --
 
