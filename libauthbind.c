@@ -141,28 +141,39 @@ int _init(void) {
   return 0;
 }
 
+static const int evilsignals[]= { SIGFPE, SIGILL, SIGSEGV, SIGBUS, 0 };
+
 int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
   pid_t child, rchild;
   char portarg[5], addrarg[9];
-  int status;
+  int r, status;
+  const int *evilsignal;
+  sigset_t block, saved;
 
   if (addr->sa_family != AF_INET || addrlen != sizeof(struct sockaddr_in) ||
       !geteuid() || ((struct sockaddr_in*)addr)->sin_port == 0 ||
       ntohs(((struct sockaddr_in*)addr)->sin_port) >= IPPORT_RESERVED/2)
     return old_bind(fd,addr,addrlen);
 
+  sigfillset(&block);
+  for (evilsignal=evilsignals;
+       *evilsignal;
+       evilsignal++)
+    sigdelset(&block,*evilsignal);
+  if (sigprocmask(SIG_BLOCK,&block,&saved)) return -1;
+  
   sprintf(addrarg,"%08lx",
 	  ((unsigned long)(((struct sockaddr_in*)addr)->sin_addr.s_addr))&0x0ffffffffUL);
   sprintf(portarg,"%04x",
 	  ((unsigned int)(((struct sockaddr_in*)addr)->sin_port))&0x0ffff);
 
-  child= fork(); if (child==-1) return -1;
+  child= fork(); if (child==-1) goto x_err;
 
   if (!child) {
     if (dup2(fd,0)) exiterrno(errno);
     removepreload();
     execl(HELPER,HELPER,addrarg,portarg,(char*)0);
-    status= errno;
+    status= errno > 0 && errno < 127 ? errno : 127;
     STDERRSTR_CONST("libauthbind: possible installation problem - "
 		    "could not invoke " HELPER " (");
     STDERRSTR_STRING(rcsid);
@@ -171,14 +182,25 @@ int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
   }
 
   rchild= waitpid(child,&status,0);
-  if (rchild==-1) return -1;
-  if (rchild!=child) { errno= ECHILD; return -1; }
+  if (rchild==-1) goto x_err;
+  if (rchild!=child) { errno= ECHILD; goto x_err; }
 
   if (WIFEXITED(status)) {
-    if (WEXITSTATUS(status)) { errno= WEXITSTATUS(status); return -1; }
-    return 0;
+    if (WEXITSTATUS(status)) {
+      errno= WEXITSTATUS(status);
+      if (errno >= 127) errno= ENXIO;
+      goto x_err;
+    }
+    r= 0;
+    goto x;
   } else {
     errno= ENOSYS;
-    return -1;
+    goto x_err;
   }
+
+x_err:
+  r= -1;
+x:
+  if (sigprocmask(SIG_SETMASK,&saved,0)) abort();
+  return r;
 }

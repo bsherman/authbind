@@ -1,10 +1,12 @@
 authbind (1.1.6) unstable; urgency=low
 
-  * Do not Build-Depends: libc6-dev (it's build-essential).
+  * Block signals during our child's execution.  Closes #186439.
   * manpage: fix subtle error in description of interaction between
     set-id and LD_PRELOAD.  Closes #36890.
   * Say in manpage that we may not work properly with multithreaded
     programs.  See also Bug#186439.
+  * Make sure we don't try to encode errno's >127 in a status code.
+  * Do not Build-Depends: libc6-dev (it's build-essential).
 
  --
 
