@@ -1,7 +1,7 @@
 authbind (1.1.5.2) frozen unstable; urgency=low
 
   * Non-maintainer upload.
-  * Makefile: Add -D_GNU_SOURCE, closes: 86963
+  * Makefile: Add -D_GNU_SOURCE, closes: 89944
 
  -- Stephen Frost <sfrost@debian.org>  Fri, 16 Mar 2001 19:42:05 -0500
 
