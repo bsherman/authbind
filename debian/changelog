@@ -1,3 +1,9 @@
+authbind (1.0-1) experimental; urgency=low
+
+  * Following testing, we can call this 1.0.
+
+ -- Ian Jackson <ian@davenant.greenend.org.uk>  Sun, 30 Aug 1998 03:15:21 +0100
+
 authbind (0.1-1) experimental; urgency=low
 
   * Initial release.

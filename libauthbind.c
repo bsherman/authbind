@@ -1,4 +1,22 @@
 /*
+ *  libauthbind.c - bind(2)-redirector library for authbind
+ *
+ *  authbind is Copyright (C) 1998 Ian Jackson
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
+ * 
  */
 
 #include <dlfcn.h>
@@ -12,8 +30,13 @@
 #include <sys/wait.h>
 #include <netinet/in.h>
 
-#define AUTHBIND_NESTED "AUTHBIND_NESTED"
-#define HELPER "/usr/lib/authbind/helper"
+static const char *rcsid="$Id$";
+
+#ifndef HELPER
+# define HELPER "/usr/local/lib/authbind/helper"
+#endif
+
+#define AUTHBIND_NESTED_VAR "AUTHBIND_NESTED"
 
 typedef void anyfn_type(void);
 typedef int bindfn_type(int fd, const struct sockaddr *addr, socklen_t addrlen);
@@ -60,9 +83,11 @@ int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
       ntohs(((struct sockaddr_in*)addr)->sin_port) >= 1024 || !geteuid())
     return old_bind(fd,addr,addrlen);
 
-  if (getenv(AUTHBIND_NESTED)) {
+  if (getenv(AUTHBIND_NESTED_VAR)) {
     STDERRSTR_CONST("libauthbind: possible installation problem - "
-		    "nested invocation, perhaps helper is not setuid\n");
+		    "nested invocation, perhaps helper is not setuid\n ");
+    STDERRSTR_STRING(rcsid);
+    STDERRSTR_CONST("\n");
     return old_bind(fd,addr,addrlen);
   }
 
@@ -75,7 +100,7 @@ int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
 
   if (!child) {
     if (dup2(fd,0)) exiterrno(errno);
-    if (setenv(AUTHBIND_NESTED,"1",1)) exiterrno(errno);
+    if (setenv(AUTHBIND_NESTED_VAR,"1",1)) exiterrno(errno);
     execl(HELPER,HELPER,addrarg,portarg,(char*)0);
     status= errno;
     STDERRSTR_CONST("libauthbind: possible installation problem - "

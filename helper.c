@@ -1,31 +1,22 @@
 /*
- * setuid.  Invoked with socket on stdin.
- *  Usage:  helper <addr> <port>
- * both are hex strings, padded to the right length.
- * they are pairs of hex digits for each byte (network byte order)
+ *  helper.c - setuid helper program for authbind
  *
- * If /etc/authbind cannot be chdir'd into, is an error.
- *
- * First, check /etc/authbind/byport/<port> with access(2,X_OK).
- *  If OK, then authorised.
- *  If ENOENT then keep looking.
- *  Otherwise, not authorised, errno=whatever
- *
- * Then check /etc/authbind/byboth/<addr>:<port> likewise.
- *
- * Then try to read /etc/authbind/byuid/<uid> (with superuser privs!)
- *  If ENOENT, then not authorised, errno=EPERM
- *  If cannot open, then not authorised, errno=whatever
- *  If it contains a line of the form
- *     <addr>/<length>:<port-min>,<port-max>
- *    then authorised, otherwise not authorised, errno=ENOENT
- *  If read error then is an error
- *
- * In each case,
- *  <addr> is dotted quad
- *  <port> is decimal in host order
- *  <length> is prefix length (so 0.0.0.0/32 matches any)
- *  <uid> is decimal unsigned
+ *  authbind is Copyright (C) 1998 Ian Jackson
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software Foundation,
+ *  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
+ * 
  */
 
 #include <errno.h>
@@ -39,7 +30,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define CONFIGDIR "/etc/authbind"
+#ifndef CONFIGDIR
+# define CONFIGDIR "/etc/authbind"
+#endif
+
+static const char *rcsid="$Id$";
 
 static void exiterrno(int e) {
   exit(e>0 && e<128 ? e : ENOSYS);
@@ -53,7 +48,7 @@ static void perrorfail(const char *m) {
 }
 
 static void badusage(void) {
-  fputs("libauthbind's helper: bad usage\n",stderr);
+  fprintf(stderr,"libauthbind's helper: bad usage\n %s\n",rcsid);
   exit(ENOSYS);
 }
 

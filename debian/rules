@@ -1,28 +1,30 @@
 #! /usr/bin/make -f
-#   -*- mode: makefile; -*-
 #
-# Modified by Ian Jackson for authbind.
-# Then last updated: Sat Dec 17 10:52:20 EST 1994 by imurdock.
+# debian/rules for authbind
+# 
+# authbind is Copyright (C) 1998 Ian Jackson
 #
-# To make the binary distribution package, the ``Debianized'' source package
-# and the context diff to the original package, type `./debian.rules dist'.
-# Make sure that `debian.rules' is executable before the final distribution
-# is made.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
 #
-# Invoke each target with `./debian.rules <target>'.  All targets should be
-# invoked with the package root as the current directory.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-# The `binary' target must be run as root, as it needs to install files with
-# specific ownerships.  The `diff' target assumes that you have the original
-# source package available, unpacked, in ../$(p)-$(v).orig, or that you have
-# the previous revision of the ``Debianized'' source package and context diff
-# in the parent directory.
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
+#
+# $Id$
 
-CC = gcc
+CC= gcc
 
 package=authbind
-major=0
-minor=1
+major=1
+minor=0
 
 arch = $(shell dpkg --print-architecture)
 
@@ -40,21 +42,17 @@ binary-indep:   checkroot build
 # made here.
 
 lab=libauthbind.so.$(major).$(minor)
+udp=debian/tmp/usr/doc/$(package)
 
 binary-arch:	checkroot build
 	rm -rf debian/tmp
-	install -d -g root -m 755 -o root debian/tmp/DEBIAN \
-		debian/tmp/usr/{bin,lib/$(package),doc/$(package)} \
-		debian/tmp/etc/authbind/{byport,byname,byuid}
-	install -s -g root -o root -m 755 authbind debian/tmp/usr/bin/.
-	install -s -g root -o root -m 4755 helper debian/tmp/usr/lib/authbind/.
-	install -s -g root -o root -m 755 $(lab) debian/tmp/usr/lib/authbind/.
-	ln -s $(lab) debian/tmp/usr/lib/authbind/libauthbind.so.$(major)
-	strip --strip-unneeded debian/tmp/usr/lib/authbind/$(lab)
-	install -g root -o root -m 644 debian/copyright debian/tmp/usr/doc/$(package)/
-	install -g root -o root -m 644 debian/changelog \
-		debian/tmp/usr/doc/$(package)/changelog.Debian
-	gzip -9 debian/tmp/usr/doc/$(package)/*
+	install -d -g root -m 755 -o root debian/tmp/DEBIAN $udp \
+		debian/tmp/usr/{bin,lib/$(package),man}
+	$(MAKE) prefix=debian/tmp/usr install install_man
+	install -g root -o root -m 644 debian/copyright $(udp)/.
+	install -g root -o root -m 644 debian/changelog $(udp)/changelog.Debian
+	gzip -9 debian/tmp/usr/man/man*/* $(udp)/*
+	install -g root -o root -m 755 debian/postrm debian/tmp/DEBIAN
 ifneq ($(arch),alpha)
 	install -g root -o root -m 644 debian/shlibs debian/tmp/DEBIAN
 else
