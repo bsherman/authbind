@@ -149,7 +149,8 @@ int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
   int status;
 
   if (addr->sa_family != AF_INET || addrlen != sizeof(struct sockaddr_in) ||
-      ntohs(((struct sockaddr_in*)addr)->sin_port) >= IPPORT_RESERVED/2 || !geteuid())
+      !geteuid() || ((struct sockaddr_in*)addr)->sin_port == 0 ||
+      ntohs(((struct sockaddr_in*)addr)->sin_port) >= IPPORT_RESERVED/2)
     return old_bind(fd,addr,addrlen);
 
   sprintf(addrarg,"%08lx",
