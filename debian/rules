@@ -29,11 +29,12 @@ minor=0
 arch = $(shell dpkg --print-architecture)
 
 build: 
-	$(MAKE)
+	$(MAKE) prefix=/usr
 
 clean:	
-	rm -rf debian/{files,substvars,tmp} build 
 	$(MAKE) distclean
+	rm -rf debian/{files,substvars,tmp} build
+	rm -f debian/*~ debian/#*# debian/core debian/*.bak
 
 binary-indep:   checkroot build
         $(checkdir)
@@ -46,9 +47,10 @@ udp=debian/tmp/usr/doc/$(package)
 
 binary-arch:	checkroot build
 	rm -rf debian/tmp
-	install -d -g root -m 755 -o root debian/tmp/DEBIAN $udp \
+	install -d -g root -m 755 -o root debian/tmp/DEBIAN $(udp) \
 		debian/tmp/usr/{bin,lib/$(package),man}
-	$(MAKE) prefix=debian/tmp/usr install install_man
+	$(MAKE) prefix=debian/tmp/usr etc_dir=debian/tmp/etc/authbind \
+		man_dir=debian/tmp/usr/man  install install_man
 	install -g root -o root -m 644 debian/copyright $(udp)/.
 	install -g root -o root -m 644 debian/changelog $(udp)/changelog.Debian
 	gzip -9 debian/tmp/usr/man/man*/* $(udp)/*
@@ -62,8 +64,6 @@ endif
 	dpkg-gencontrol
 	chown -R root.root debian/tmp
 	chmod -R g-ws debian/tmp
-	#/bin/bash #-c "ls debian/tmp"
-	#bash -c "dpkg --build debian/tmp .."
 	dpkg --build debian/tmp ..
 
 binary:	 binary-indep binary-arch

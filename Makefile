@@ -19,12 +19,16 @@
 # $Id$
 
 prefix=/usr/local
-share_dir=$(prefix)/share
-etc_dir=/etc/authbind
+
+bin_dir=$(prefix)/bin
 lib_dir=$(prefix)/lib/authbind
+
+share_dir=$(prefix)/share
 man_dir=$(share_dir)/man
 man1_dir=$(man_dir)/man1
 man8_dir=$(man_dir)/man8
+
+etc_dir=/etc/authbind
 
 OPTIMISE=	-O2
 CFLAGS=		-g $(OPTIMISE) \
@@ -32,7 +36,7 @@ CFLAGS=		-g $(OPTIMISE) \
 		-Wnested-externs -Wmissing-prototypes -Wstrict-prototypes
 CPPFLAGS=	-DMAJOR_VER='"$(MAJOR)"' -DMINOR_VER='"$(MINOR)"' \
 		-DLIBAUTHBIND='"$(lib_dir)/$(LIBCANON)"' \
-		-DHELPER='"$(prefix)/helper"' -DCONFIGDIR='"$(etc_dir)"'
+		-DHELPER='"$(lib_dir)/helper"' -DCONFIGDIR='"$(etc_dir)"'
 
 MAJOR=1
 MINOR=0
@@ -40,18 +44,18 @@ LIBCANON=	libauthbind.so.$(MAJOR)
 LIBTARGET=	$(LIBCANON).$(MINOR)
 
 TARGETS=		authbind helper $(LIBTARGET)
-MANPAGES_1=		authbind
-MANPAGES_8=		authbind-helper
+MANPAGES_1=		authbind.1
+MANPAGES_8=		authbind-helper.8
 
 all:			$(TARGETS)
 
 install:		$(TARGETS)
-		install -o root -g root -m 755 -d $(lib_dir) $(man_dir)
-		install -o root -g root -m 755 authbind $(bin_dir)/.
+		install -o root -g root -m 755 -d $(lib_dir) $(man1_dir) $(man8_dir)
+		install -o root -g root -m 755 -s authbind $(bin_dir)/.
 		install -o root -g root -m 755 $(LIBTARGET) $(lib_dir)/.
 		strip --strip-unneeded $(lib_dir)/$(LIBTARGET)
 		ln -s $(LIBTARGET) $(lib_dir)/$(LIBCANON)
-		install -o root -g root -m 4755 helper $(lib_dir)/.
+		install -o root -g root -m 4755 -s helper $(lib_dir)/.
 		install -o root -g root -m 755 -d $(etc_dir) \
 			$(etc_dir)/byport $(etc_dir)/byaddr $(etc_dir)/byuid
 
