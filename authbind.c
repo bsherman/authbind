@@ -57,7 +57,7 @@ int main(int argc, char *const *argv) {
   while (argc>1 && argv[1][0]=='-') {
     argc--; argv++;
     if (!argv[0][1]) break;
-    if (!strcmp("--deep",argv[0])) { depth= -1; }
+    if (!strcmp("--deep",argv[0])) { depth= 0; }
     else if (!strcmp("--depth",argv[0])) {
       if (argc<=1) usageerror("--depth requires a value");
       argc--; argv++;
@@ -90,7 +90,7 @@ int main(int argc, char *const *argv) {
   if (depth > 1) {
     sprintf(buf,"%ld",depth-1);
     mustsetenv(AUTHBIND_LEVELS_VAR,buf);
-  } else if (depth == -1) {
+  } else if (depth == 0) {
     mustsetenv(AUTHBIND_LEVELS_VAR,"y");
   } else {
     assert(depth==1);
