@@ -190,6 +190,13 @@ makes an
 installation specific to a particular C library.  This version is for
 GNU/Linux libc6 (glibc2).
 .PP
+.B authbind
+may not operate correctly with multithreaded programs.  It is
+inherently very difficult (if not impossible) to perform the kind of
+trickery that authbind does while preventing all undesirable
+interactions between authbind's activities and those of (say) a
+threading runtime system.
+.PP
 It is quite possible that
 .B authbind
 and other programs and facilities which use
