@@ -1,6 +1,5 @@
 authbind (1.1.6) unstable; urgency=low
 
-  * Priority changed to `optional' as per override file.
   * Do not Build-Depends: libc6-dev (it's build-essential).
 
  --
