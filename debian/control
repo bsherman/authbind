@@ -1,6 +1,6 @@
 Source: authbind
 Section: utils
-Priority: extra
+Priority: optional
 Maintainer: Ian Jackson <ian@chiark.greenend.org.uk>
 Standards-Version: 2.1.1.0
 
