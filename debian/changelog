@@ -1,0 +1,9 @@
+authbind (0.1-1) experimental; urgency=low
+
+  * Initial release.
+
+ -- Ian Jackson <ian@davenant.greenend.org.uk>  Sat, 29 Aug 1998 20:10:37 +0100
+
+Local variables:
+mode: debian-changelog
+End:
