@@ -1,0 +1,8 @@
+#!/bin/sh
+if [ "$1" = "configure" ]; then
+  if [ -d /usr/doc -a ! -e /usr/doc/authbind -a -d /usr/share/doc/authbind ];
+  then
+    ln -sf ../share/doc/authbind /usr/doc/authbind
+  fi
+fi
+

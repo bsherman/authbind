@@ -28,6 +28,32 @@ minor=0
 
 arch = $(shell dpkg --print-architecture)
 
+INSTALL = install
+INSTALL_FILE    = $(INSTALL) -p    -o root -g root  -m  644
+INSTALL_PROGRAM = $(INSTALL) -p    -o root -g root  -m  755
+INSTALL_SCRIPT  = $(INSTALL) -p    -o root -g root  -m  755
+INSTALL_DIR     = $(INSTALL) -p -d -o root -g root  -m  755
+
+CFLAGS = -O2 -Wall
+LDFLAGS = 
+
+
+CFLAGS += -g
+LDFLAGS += -g 
+
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+INSTALL_PROGRAM += -s
+endif
+
+export CFLAGS
+export LDFLAGS
+export INSTALL
+export INSTALL_FILE
+export INSTALL_PROGRAM
+export INSTALL_SCRIPT
+export INSTALL_DIR
+
+
 build: 
 	$(MAKE) prefix=/usr
 
@@ -43,25 +69,25 @@ binary-indep:   checkroot build
 # made here.
 
 lab=libauthbind.so.$(major).$(minor)
-udp=debian/tmp/usr/doc/$(package)
+udp=debian/tmp/usr/share/doc/$(package)
 
 binary-arch:	checkroot build
 	rm -rf debian/tmp
 	install -d -g root -m 755 -o root debian/tmp/DEBIAN $(udp) \
-		debian/tmp/usr/{bin,lib/$(package),man}
+		debian/tmp/usr/{bin,lib/$(package),share/man}
 	$(MAKE) prefix=debian/tmp/usr etc_dir=debian/tmp/etc/authbind \
-		man_dir=debian/tmp/usr/man  install install_man
-	install -g root -o root -m 644 debian/changelog $(udp)/changelog.Debian
-	gzip -9 debian/tmp/usr/man/man*/* $(udp)/*
-	install -g root -o root -m 644 debian/copyright $(udp)/.
-	install -g root -o root -m 755 debian/postrm debian/tmp/DEBIAN
+		man_dir=debian/tmp/usr/share/man  install install_man
+	$(INSTALL_FILE) debian/changelog $(udp)/changelog
+	gzip -9 debian/tmp/usr/share/man/man*/* $(udp)/*
+	$(INSTALL_FILE) debian/copyright $(udp)/.
+	$(INSTALL_SCRIPT) debian/{postrm,prerm,postinst} debian/tmp/DEBIAN
 ifneq ($(arch),alpha)
-	install -g root -o root -m 644 debian/shlibs debian/tmp/DEBIAN
+	$(INSTALL_FILE) debian/shlibs debian/tmp/DEBIAN
 else
-	install -g root -o root -m 644 debian/shlibs.alpha debian/tmp/DEBIAN/shlibs
+	$(INSTALL_FILE) debian/shlibs.alpha debian/tmp/DEBIAN/shlibs
 endif
 	dpkg-shlibdeps ./authbind
-	dpkg-gencontrol
+	dpkg-gencontrol -isp
 	chown -R root.root debian/tmp
 	chmod -R g-ws debian/tmp
 	dpkg --build debian/tmp ..

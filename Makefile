@@ -30,6 +30,10 @@ man8_dir=$(man_dir)/man8
 
 etc_dir=/etc/authbind
 
+INSTALL_FILE=install -o root -g root -m 644 
+INSTALL_PROGRAM=install -o root -g root -m 755 -s
+INSTALL_DIR=install -o root -g root -m 755 -d 
+
 OPTIMISE=	-O2
 LDFLAGS=	-g
 CFLAGS=		-g $(OPTIMISE) \
@@ -52,18 +56,19 @@ MANPAGES_8=		authbind-helper.8
 all:			$(TARGETS)
 
 install:		$(TARGETS)
-		install -o root -g root -m 755 -d $(lib_dir) $(man1_dir) $(man8_dir)
-		install -o root -g root -m 755 -s authbind $(bin_dir)/.
-		install -o root -g root -m 644 $(LIBTARGET) $(lib_dir)/.
+		$(INSTALL_DIR) $(lib_dir) $(man1_dir) $(man8_dir)
+		$(INSTALL_PROGRAM) authbind $(bin_dir)/.
+		$(INSTALL_FILE) $(LIBTARGET) $(lib_dir)/.
 		strip --strip-unneeded $(lib_dir)/$(LIBTARGET)
 		ln -sf $(LIBTARGET) $(lib_dir)/$(LIBCANON)
-		install -o root -g root -m 4755 -s helper $(lib_dir)/.
-		install -o root -g root -m 755 -d $(etc_dir) \
+		$(INSTALL_PROGRAM) helper $(lib_dir)/.
+		chmod u+s $(lib_dir)/helper
+		$(INSTALL_DIR) $(etc_dir) \
 			$(etc_dir)/byport $(etc_dir)/byaddr $(etc_dir)/byuid
 
 install_man:		$(MANPAGES_1) $(MANPAGES_8)
-		install -o root -g root -m 644 $(MANPAGES_1) $(man1_dir)/.
-		install -o root -g root -m 644 $(MANPAGES_8) $(man8_dir)/.
+		$(INSTALL_FILE) $(MANPAGES_1) $(man1_dir)/.
+		$(INSTALL_FILE) $(MANPAGES_8) $(man8_dir)/.
 
 libauthbind.o:		libauthbind.c authbind.h
 		$(CC) -D_REENTRANT $(CFLAGS) $(CPPFLAGS) -c -o $@ -fPIC $<

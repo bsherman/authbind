@@ -4,6 +4,19 @@ authbind (1.1.6) unstable; urgency=low
 
  --
 
+authbind (1.1.5.3) unstable; urgency=low
+
+  * Moved man pages to /usr/share/man and docs to
+    /usr/share/doc/authbind. Added a prerm and a postinst script to set
+    the /usr/doc/authbind link. (closes: #91112, #91376, #91387)
+  * Fixed the path to the common licenses in debian/copyright
+  * Added a section and priority field to the changelog
+  * Added support for the `nostrip' and `debug' options in
+    DEB_BUILD_OPTIONS.
+  * Boosted Standards-Version to 3.5.2
+
+ -- Bas Zoetekouw <bas@debian.org>  Sun, 13 May 2001 18:00:52 +0200
+
 authbind (1.1.5.2) frozen unstable; urgency=low
 
   * Non-maintainer upload.
