@@ -1,3 +1,13 @@
+authbind (1.1.5.1) frozen unstable; urgency=low
+
+  * Non-maintainer upload.
+  * debian/rules (clean): use tab not spaces, so `debian/rules clean'
+    actually works. [#27360]
+  * debian/rules (binary-arch): don't compress the copyright file.
+  * Makefile: install the shared library non-executable.
+ 
+ -- James Troup <james@nocrew.org>  Sun,  3 Jan 1999 21:23:50 +0000
+
 authbind (1.1.5) unstable; urgency=low
 
   * Fix coredump bug !
