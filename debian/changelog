@@ -15,8 +15,9 @@ authbind (1.1.6) unstable; urgency=low
 
  --
 
-authbind (1.1.5.3) unstable; urgency=low
+authbind (1.1.5.2-0.1) unstable; urgency=low
 
+  * Non-maintainer Upload
   * Moved man pages to /usr/share/man and docs to
     /usr/share/doc/authbind. Added a prerm and a postinst script to set
     the /usr/doc/authbind link. (closes: #91112, #91376, #91387)
