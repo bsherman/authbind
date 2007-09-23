@@ -1,3 +1,9 @@
+authbind (1.2.1) unstable; urgency=low
+
+  * Set Priority to optional as in ftpmaster override file.
+
+ --
+
 authbind (1.2.0) unstable; urgency=low
 
   * Block signals during our child's execution.  Closes: #186439.
