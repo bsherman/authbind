@@ -44,6 +44,9 @@ LDFLAGS += -g
 
 ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 INSTALL_PROGRAM += -s
+STRIP=strip
+else
+STRIP=:
 endif
 
 export CFLAGS
@@ -53,6 +56,7 @@ export INSTALL_FILE
 export INSTALL_PROGRAM
 export INSTALL_SCRIPT
 export INSTALL_DIR
+export STRIP
 
 
 build: 

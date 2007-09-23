@@ -31,9 +31,10 @@ man8_dir=$(man_dir)/man8
 
 etc_dir=/etc/authbind
 
-INSTALL_FILE=install -o root -g root -m 644 
-INSTALL_PROGRAM=install -o root -g root -m 755 -s
-INSTALL_DIR=install -o root -g root -m 755 -d 
+INSTALL_FILE	?= install -o root -g root -m 644 
+INSTALL_PROGRAM ?= install -o root -g root -m 755 -s
+INSTALL_DIR	?= install -o root -g root -m 755 -d
+STRIP		?= strip
 
 OPTIMISE=	-O2
 LDFLAGS=	-g
@@ -63,7 +64,7 @@ install:		$(TARGETS)
 		$(INSTALL_DIR) $(lib_dir) $(man1_dir) $(man8_dir)
 		$(INSTALL_PROGRAM) $(BINTARGETS) $(bin_dir)/.
 		$(INSTALL_FILE) $(LIBTARGET) $(lib_dir)/.
-		strip --strip-unneeded $(lib_dir)/$(LIBTARGET)
+		$(STRIP) --strip-unneeded $(lib_dir)/$(LIBTARGET)
 		ln -sf $(LIBTARGET) $(lib_dir)/$(LIBCANON)
 		$(INSTALL_PROGRAM) $(HELPER) $(libexec_dir)/.
 		chmod u+s $(libexec_dir)/$(HELPER)
