@@ -12,8 +12,7 @@ authbind (1.2.0) unstable; urgency=low
   * #include <signal.h> in libauthbind.c.
   * Set SHELL=/bin/bash in debian/rules.  Closes #374586.
   * Revert Amaya's accidental change to CC= line in debian/rules.
-  * Debian-native again.  (NMUers: please feel free to upload
-    with version numbers of the form 1.2.0.x.)
+  * Debian-native again.  Closes #393556.
 
  --
 
