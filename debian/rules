@@ -21,6 +21,7 @@
 # $Id$
 
 CC= gcc
+SHELL=/bin/bash
 
 package=authbind
 major=1
