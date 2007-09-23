@@ -1,7 +1,7 @@
 Source: authbind
 Section: utils
 Priority: extra
-Maintainer: Ian Jackson <ian@chiark.greenend.org.uk>
+Maintainer: Ian Jackson <ian@davenant.greenend.org.uk>
 Standards-Version: 3.7.2
 
 Package: authbind
