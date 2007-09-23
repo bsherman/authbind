@@ -1,4 +1,4 @@
-This is the Debian/GNU Linux prepackaged version of my `authbind'
+This is the Debian GNU/Linux prepackaged version of my `authbind'
 utility for allowing non-root programs to bind to privileged ports,
 subject to configuration by the sysadmin.
 

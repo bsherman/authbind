@@ -6,14 +6,26 @@ authbind (1.1.6) unstable; urgency=low
   * Say in manpage that we may not work properly with multithreaded
     programs.  See also Bug#186439.
   * Make sure we don't try to encode errno's >127 in a status code.
-  * Do not Build-Depends: libc6-dev (it's build-essential).
   * New make variables for improved portability and customisation of
     locations: LIBS, libexec_dir, HELPER, BINTARGETS.
   * make clean removes *.core too.
   * #include <signal.h> in libauthbind.c.
   * Set SHELL=/bin/bash in debian/rules.  Closes #374586.
+  * Revert Amaya's accidental change to CC= line in debian/rules.
 
  --
+
+authbind (1.1.5.2-0.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Get rid of the /usr/doc link (Closes: #359363).
+  * Revamped packaging a bit:
+    - Get rid of Build-Depends on libc6-dev (build-essential)
+    - spelling-error-in-copyright Debian/GNU Linux Debian GNU/Linux
+    - Not debian-native anymore
+    - Updated ancient-standards-version to 3.7.2, no changes needed.
+
+ -- Amaya Rodrigo Sastre <amaya@debian.org>  Wed, 12 Jul 2006 12:28:12 +0200
 
 authbind (1.1.5.2-0.1) unstable; urgency=low
 
