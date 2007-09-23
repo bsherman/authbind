@@ -18,7 +18,7 @@ authbind (1.2.0) unstable; urgency=low
     - in rules, export STRIP=: if nostrip
   * Change my email address in Maintainer: to davenant.
     
- --
+ -- Ian Jackson <ian@davenant.greenend.org.uk>  Sun, 23 Sep 2007 20:23:50 +0100
 
 authbind (1.1.5.2-0.2) unstable; urgency=low
 
