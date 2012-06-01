@@ -86,11 +86,6 @@ binary-arch:	checkroot build
 	gzip -9 debian/tmp/usr/share/man/man*/* $(udp)/*
 	$(INSTALL_FILE) debian/copyright $(udp)/.
 	$(INSTALL_SCRIPT) debian/{postrm,prerm,postinst} debian/tmp/DEBIAN
-ifneq ($(arch),alpha)
-	$(INSTALL_FILE) debian/shlibs debian/tmp/DEBIAN
-else
-	$(INSTALL_FILE) debian/shlibs.alpha debian/tmp/DEBIAN/shlibs
-endif
 	dpkg-shlibdeps ./authbind
 	dpkg-gencontrol -isp
 	chown -R root.root debian/tmp
