@@ -52,10 +52,10 @@ static void badusage(void) {
   exit(ENOSYS);
 }
 
-static struct sockaddr_in saddr;
+static struct sockaddr_in saddr4;
 
 static void authorised(void) {
-  if (bind(0,&saddr,sizeof(saddr))) exiterrno(errno);
+  if (bind(0,&saddr4,sizeof(saddr4))) exiterrno(errno);
   else _exit(0);
 }
 
@@ -78,16 +78,16 @@ int main(int argc, const char *const *argv) {
   if (chdir(CONFIGDIR)) perrorfail("chdir " CONFIGDIR);
 
   fnbuf[sizeof(fnbuf)-1]= 0;
-  memset(&saddr,0,sizeof(saddr));
-  saddr.sin_family= AF_INET;
-  saddr.sin_port= port;
-  saddr.sin_addr.s_addr= addr;
+  memset(&saddr4,0,sizeof(saddr4));
+  saddr4.sin_family= AF_INET;
+  saddr4.sin_port= port;
+  saddr4.sin_addr.s_addr= addr;
 
   snprintf(fnbuf,sizeof(fnbuf)-1,"byport/%u",hport);
   if (!access(fnbuf,X_OK)) authorised();
   if (errno != ENOENT) exiterrno(errno);
 
-  np= inet_ntoa(saddr.sin_addr); assert(np);
+  np= inet_ntoa(saddr4.sin_addr); assert(np);
   snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s:%u",np,hport);
   if (!access(fnbuf,X_OK)) authorised();
   if (errno != ENOENT) exiterrno(errno);
