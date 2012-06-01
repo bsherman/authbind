@@ -5,6 +5,8 @@ authbind (2.0.0~~iwj) unstable; urgency=medium
     Explain the problem more clearly in the manpage.  (Closes: 654706.)
   * Correct manpage description of helper protocol to have
     actually-implemented byte order convention.  (Closes: #651694.)
+  * Remove shlibs files.  These are not needed because nothing should
+    actually link to libauthbind.
   * Improve wording in BUGS section of manpage about forking.
   * Set Priority to optional as in ftpmaster override file.
   * Upstream repo is now in git.

@@ -3,10 +3,10 @@ utility for allowing non-root programs to bind to privileged ports,
 subject to configuration by the sysadmin.
 
 This package was put together by me, Ian Jackson
-<ian@chiark.greenend.org.uk>, from my CVS repository.
+<ijackson@chiark.greenend.org.uk>, from my git repository.
 
 
-authbind is Copyright (C)1998 Ian Jackson <ian@chiark.greenend.org.uk>.
+authbind is Copyright (C)1998,2012 Ian Jackson <ian@chiark.greenend.org.uk>.
 
 authbind is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -20,8 +20,7 @@ General Public License for more details.
 
 You should have received a copy of the GNU General Public License with
 your Debian GNU/Linux system, in /usr/share/common-licenses, or with the
-Debian GNU/Linux userv source package as the file COPYING; if not,
-email me at one of the addresses above or write to the Free Software
-Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+Debian GNU/Linux authbind source package as the file COPYING; if not,
+email me at one of the addresses above.
 
 $Id$
