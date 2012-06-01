@@ -83,8 +83,8 @@ int main(int argc, const char *const *argv) {
   const char *np;
   const char *tophalfchar="";
   unsigned long port, addr4=0, haddr4=0;
-  unsigned int hport, a1,a2,a3,a4, alen,pmin,pmax;
-  int nchar, af;
+  unsigned int hport;
+  int af;
   FILE *file;
 
   if (argc == 3) {
@@ -139,7 +139,13 @@ int main(int argc, const char *const *argv) {
   np= inet_ntop(af,addr_any,npbuf,addrlen_any);
   assert(np);
 
-  snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s:%s%u",np,tophalfchar,hport);
+  if (af == AF_INET) {
+    snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s%s:%u",np,tophalfchar,hport);
+    if (!access(fnbuf,X_OK)) authorised();
+    if (errno != ENOENT) exiterrno(errno);
+  }
+
+  snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s%s,%u",np,tophalfchar,hport);
   if (!access(fnbuf,X_OK)) authorised();
   if (errno != ENOENT) exiterrno(errno);
 
@@ -150,15 +156,14 @@ int main(int argc, const char *const *argv) {
   if (!file) exiterrno(errno==ENOENT ? EPERM : errno);
 
   while (fgets(fnbuf,sizeof(fnbuf)-1,file)) {
-    nchar= -1;
+    unsigned int a1,a2,a3,a4, alen,pmin,pmax;
+    int nchar= -1;
 
-    char *colon = strchr(fnbuf,'/');
-    if (!colon) continue;
-    *colon++ = '\0';
+    if (af == AF_INET &&
+	(sscanf(fnbuf," %u.%u.%u.%u/%u: %u,%u %n",
+		&a1,&a2,&a3,&a4,&alen,&pmin,&pmax,&nchar),
+	 nchar == strlen(fnbuf))) {
 
-    sscanf(fnbuf," %u.%u.%u.%u/%u%n",
-	   &a1,&a2,&a3,&a4,&alen,&nchar);
-    if (nchar == strlen(fnbuf)) {
       if (alen>32 || pmin&~0x0ffff || pmax&~0x0ffff ||
 	  a1&~0x0ff || a2&~0xff || a3&~0x0ff || a4&~0x0ff)
 	continue;
@@ -167,7 +172,13 @@ int main(int argc, const char *const *argv) {
       thaddr= (a1<<24)|(a2<<16)|(a3<<8)|(a4);
       thmask= 0x0ffffffffUL<<(32-alen);
       if ((haddr4&thmask) != thaddr) continue;
+
     } else {
+
+      char *comma = strchr(fnbuf,',');
+      if (comma) continue;
+      *comma++ = '\0';
+
       char *hyphen = strchr(fnbuf,'-');
       const char *min, *max;
       if (hyphen) {
@@ -182,17 +193,17 @@ int main(int argc, const char *const *argv) {
       unsigned char maxaddr[addrlen_any];
       if (inet_pton(af,min,minaddr) != 1 ||
 	  inet_pton(af,max,maxaddr) != 1)
-        continue;
+	continue;
       if (memcmp(addr_any,minaddr,addrlen_any) < 0 ||
 	  memcmp(addr_any,maxaddr,addrlen_any) > 0)
-        continue;
-    }
+	continue;
 
-    sscanf(colon," %u,%u %n",
-	   &pmin,&pmax,&nchar);
-    if (nchar != strlen(colon))
-      continue;
-    
+      sscanf(comma," %u-%u %n",
+	     &pmin,&pmax,&nchar);
+      if (nchar != strlen(comma))
+	continue;
+
+    }
     if (hport<pmin || hport>pmax) continue;
 
     authorised();

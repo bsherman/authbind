@@ -65,7 +65,7 @@ of files in a configuration area,
 .BR /etc/authbind .
 .PP
 Firstly,
-.BR /etc/authbind/byport/ [ ! ]\fIport\fR
+.BI /etc/authbind/byport/ port
 is tested.  If this file is accessible for execution to the calling
 user, according to
 .BR access (2),
@@ -84,11 +84,17 @@ call, usually
 .RI ( "Permission denied" ).
 .PP
 Secondly, if that test fails to resolve the matter,
-.BR /etc/authbind/byaddr/ \fIaddr\fR : [ ! ]\fIport\fR
-is tested, in the same manner as above.
+.BI /etc/authbind/byaddr/ addr , port
+(any protocol) or failing that
+.BI /etc/authbind/byaddr/ addr : port
+(IPv4 only)
+is tested, in the same manner as above.  (Here
+.I addr
+is as from
+.BR inet_ntop .)
 .PP
 Thirdly, if the question is still unresolved, the file
-.BR /etc/authbind/byuid/ [ ! ]\fIuid\fR
+.BI /etc/authbind/byuid/ uid
 will be opened and read.  If the file does not exist then the binding
 is not authorised and
 .B bind
@@ -97,17 +103,20 @@ will return
 .RI ( "Operation not permitted" ", or " "Not owner" ).
 If the file does exist it will be searched for a line of the form
 .nf
-.IB		addr4 / length : min\-port , max\-port
-.IR		addrmin [\fB-\fR addrmax ]\fB:\fR min\-port \fB,\fR max\-port
+.IR		addrmin [\fB\-\fR addrmax ]\fB,\fR portmin \fB\-\fR portmax
+.IB		addr4 / length : portmin , portmax
 .fi
-matching the request.   The first form requires that the initial
+matching the request.
+The first form requires that the address lies in the
+relevant range (inclusive at both ends).
+The second form requires that the initial
 .I length
 bits of
 .I addr
 match those in the proposed
 .B bind
-call.  The second form requires that the address lies in the
-relevant range (inclusive at both ends).  Addresses can
+call and is only available for IPv4.
+Addresses can
 be in any form acceptable to inet_pton.  In both cases
 the proposed port number must lie is in the inclusive range
 specified.  If such a line is found then the binding is authorised.
@@ -122,9 +131,6 @@ In each case above,
 .I port
 is the (local) TCP or UDP port number, expressed as an unsigned
 integer in the minimal non-zero number of digits, and
-.TP
-.I addr
-is the (local) IP address, as a dotted quad.
 .PP
 If a read error occurs, or the directory
 .B /etc/authbind
@@ -134,21 +140,24 @@ fail, but an error message will be printed to stderr.  Unrecognised
 lines in
 .BI /etc/authbind/byuid/ uid
 files are silently ignored (as are lines whose
-.I addr
+.I addr4
 has non-zero bits more than
 .I length
-from the top).
-.TP
+from the top) or where
+.I min
+is larger than
+.IR max .
+.PP
 Authorising binding to ports from 512 to 1023 inclusive is
 not recommended.  Some protocols (including some versions of NFS)
 authorise clients by seeing that they are using a port number in this
 range.  So by authorising a program to be a server for such a port,
 you are also authorising it to impersonate the whole host for those
 protocols.  To make sure that this isn't done by accident,
-if the port number requested is in the range 512-1023, all the files
-checked and read will have the additional
+if the port number requested is in the range 512-1023, authbind
+will expect the permission files to have an additional
 .B !
-character.
+at the start of their leafname.
 .SH MECHANISM
 The shared library loaded using
 .B LD_PRELOAD
@@ -241,14 +250,14 @@ wishes it to use authbind they could have it load the
 library explicitly rather than via
 .BR LD_PRELOAD .
 .PP
-Some badly-written programs may have trouble because
+Some programs may have trouble because
 .B authbind
 spawns a child process `under their feet', causing (for example) a
 .BR fork (2)
 to happen and
 .B SIGCHLD
-signal to be delivered.  Programs should not rely on standard
-libraries not doing these things.
+signal to be delivered.  Unfortunately the Unix API does not make
+it possible to deal with this problem in a sane way.
 .PP
 The access control configuration scheme is somewhat strange.
 .SH FILES AND ENVIRONMENT VARIABLES

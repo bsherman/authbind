@@ -146,15 +146,30 @@ static const int evilsignals[]= { SIGFPE, SIGILL, SIGSEGV, SIGBUS, 0 };
 
 int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
   pid_t child, rchild;
-  char portarg[5], addrarg[9];
-  int r, status;
+  char portarg[5], addrarg[33];
+  const char *afarg;
+  int i, r, status;
   const int *evilsignal;
   sigset_t block, saved;
+  unsigned int portval;
 
-  if (addr->sa_family != AF_INET || addrlen != sizeof(struct sockaddr_in) ||
-      !geteuid() || ((struct sockaddr_in*)addr)->sin_port == 0 ||
-      ntohs(((struct sockaddr_in*)addr)->sin_port) >= IPPORT_RESERVED/2)
+  switch (addr->sa_family) {
+  case AF_INET:
+    portval = ((struct sockaddr_in*)addr)->sin_port;
+    if (addrlen != sizeof(struct sockaddr_in)) goto bail;
+    break;
+  case AF_INET6:
+    portval = ((struct sockaddr_in6*)addr)->sin6_port;
+    if (addrlen != sizeof(struct sockaddr_in6)) goto bail;
+    break;
+  default:
+    goto bail;
+  }
+
+  if (!geteuid() || portval == 0 || portval >= IPPORT_RESERVED) {
+  bail:
     return old_bind(fd,addr,addrlen);
+  }
 
   sigfillset(&block);
   for (evilsignal=evilsignals;
@@ -162,18 +177,32 @@ int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
        evilsignal++)
     sigdelset(&block,*evilsignal);
   if (sigprocmask(SIG_BLOCK,&block,&saved)) return -1;
-  
-  sprintf(addrarg,"%08lx",
-	  ((unsigned long)(((struct sockaddr_in*)addr)->sin_addr.s_addr))&0x0ffffffffUL);
+
+  switch (addr->sa_family) {
+  case AF_INET:
+    afarg = 0;
+    sprintf(addrarg,"%08lx",
+	    ((unsigned long)(((struct sockaddr_in*)addr)->sin_addr.s_addr))
+	    &0x0ffffffffUL);
+    break;
+  case AF_INET6:
+    afarg = "6";
+    for (i=0; i<16; i++)
+      sprintf(addrarg+i*2,"%02x",
+	      ((struct sockaddr_in6*)addr)->sin6_addr.s6_addr[i]);
+    break;
+  default:
+    abort();
+  }
   sprintf(portarg,"%04x",
-	  ((unsigned int)(((struct sockaddr_in*)addr)->sin_port))&0x0ffff);
+	  portval&0x0ffff);
 
   child= fork(); if (child==-1) goto x_err;
 
   if (!child) {
     if (dup2(fd,0)) exiterrno(errno);
     removepreload();
-    execl(HELPER,HELPER,addrarg,portarg,(char*)0);
+    execl(HELPER,HELPER,addrarg,portarg,afarg,(char*)0);
     status= errno > 0 && errno < 127 ? errno : 127;
     STDERRSTR_CONST("libauthbind: possible installation problem - "
 		    "could not invoke " HELPER " (");
