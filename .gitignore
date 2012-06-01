@@ -4,3 +4,6 @@ authbind
 helper
 libauthbind.o
 libauthbind.so.1.0
+debian/files
+debian/substvars
+debian/tmp
