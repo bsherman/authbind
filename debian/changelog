@@ -1,17 +1,24 @@
 authbind (2.0.0~~iwj) unstable; urgency=medium
 
+  Important new functionality:
   * Support IPv6.  (Closes: #596921.)
   * Support ports 512-1023 if the user really wants.
     Explain the problem more clearly in the manpage.  (Closes: 654706.)
+
+  Bugfixes:
   * Correct manpage description of helper protocol to have
     actually-implemented byte order convention.  (Closes: #651694.)
+  * Improve wording in BUGS section of manpage about forking.
+
+  Packaging fixes:
   * Remove shlibs files.  These are not needed because nothing should
     actually link to libauthbind.
-  * Improve wording in BUGS section of manpage about forking.
-  * Set Priority to optional as in ftpmaster override file.
+  * Update Standards-Version.
   * Upstream repo is now in git.
+  * Change my email address.
+  * Set Priority to optional as in ftpmaster override file.
 
- -- Ian Jackson <ian@zealot.relativity.greenend.org.uk>  Sat, 02 Jun 2012 00:05:29 +0100
+ -- Ian Jackson <ijackson@chiark.greenend.org.uk>  Sat, 02 Jun 2012 00:26:54 +0100
 
 authbind (1.2.0) unstable; urgency=low
 
