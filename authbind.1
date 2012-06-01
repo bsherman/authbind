@@ -65,7 +65,7 @@ of files in a configuration area,
 .BR /etc/authbind .
 .PP
 Firstly,
-.BI /etc/authbind/byport/ port
+.BR /etc/authbind/byport/ [ ! ]\fIport\fR
 is tested.  If this file is accessible for execution to the calling
 user, according to
 .BR access (2),
@@ -84,11 +84,11 @@ call, usually
 .RI ( "Permission denied" ).
 .PP
 Secondly, if that test fails to resolve the matter,
-.BI /etc/authbind/byaddr/ addr : port
+.BR /etc/authbind/byaddr/ \fIaddr\fR : [ ! ]\fIport\fR
 is tested, in the same manner as above.
 .PP
 Thirdly, if the question is still unresolved, the file
-.BI /etc/authbind/byuid/ uid
+.BR /etc/authbind/byuid/ [ ! ]\fIuid\fR
 will be opened and read.  If the file does not exist then the binding
 is not authorised and
 .B bind
@@ -97,15 +97,19 @@ will return
 .RI ( "Operation not permitted" ", or " "Not owner" ).
 If the file does exist it will be searched for a line of the form
 .nf
-.IB		addr / length : min\-port , max\-port
+.IB		addr4 / length : min\-port , max\-port
+.IR		addrmin [\fB-\fR addrmax ]\fB:\fR min\-port \fB,\fR max\-port
 .fi
-matching the request (ie, the initial
+matching the request.   The first form requires that the initial
 .I length
 bits of
 .I addr
 match those in the proposed
 .B bind
-call, and the proposed port number lies is in the inclusive range
+call.  The second form requires that the address lies in the
+relevant range (inclusive at both ends).  Addresses can
+be in any form acceptable to inet_pton.  In both cases
+the proposed port number must lie is in the inclusive range
 specified.  If such a line is found then the binding is authorised.
 Otherwise it is not, and
 .B bind
@@ -134,6 +138,17 @@ files are silently ignored (as are lines whose
 has non-zero bits more than
 .I length
 from the top).
+.TP
+Authorising binding to ports from 512 to 1023 inclusive is
+not recommended.  Some protocols (including some versions of NFS)
+authorise clients by seeing that they are using a port number in this
+range.  So by authorising a program to be a server for such a port,
+you are also authorising it to impersonate the whole host for those
+protocols.  To make sure that this isn't done by accident,
+if the port number requested is in the range 512-1023, all the files
+checked and read will have the additional
+.B !
+character.
 .SH MECHANISM
 The shared library loaded using
 .B LD_PRELOAD
@@ -178,7 +193,8 @@ the program's stderr, was well as returning -1 from
 .BR bind .
 .SH BUGS
 .B authbind
-currently only supports IPv4 sockets.  Programs which open other kinds
+currently only supports IPv4 and IPv6 sockets.
+Programs which open other kinds
 of sockets will not benefit from
 .BR authbind ,
 but it won't get in their way.
@@ -233,11 +249,6 @@ to happen and
 .B SIGCHLD
 signal to be delivered.  Programs should not rely on standard
 libraries not doing these things.
-.PP
-Ports from 512 to 1023 inclusive cannot be used with
-.B authbind
-because that would create a security hole, in conjection with
-.BR rshd .
 .PP
 The access control configuration scheme is somewhat strange.
 .SH FILES AND ENVIRONMENT VARIABLES

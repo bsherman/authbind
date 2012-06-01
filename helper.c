@@ -53,67 +53,148 @@ static void badusage(void) {
 }
 
 static struct sockaddr_in saddr4;
+static struct sockaddr_in6 saddr6;
+
+static struct sockaddr *saddr_any;
+static const void *addr_any;
+static size_t saddrlen_any, addrlen_any;
 
 static void authorised(void) {
-  if (bind(0,&saddr4,sizeof(saddr4))) exiterrno(errno);
+  if (bind(0,saddr_any,saddrlen_any)) exiterrno(errno);
   else _exit(0);
+}
+
+static void hex2bytes(const char *string, unsigned char *out, int len) {
+  int i;
+  for (i=0; i<len; i++) {
+    char hex[3], *ep;
+    hex[0]= *string++;  if (!hex[0]) badusage();
+    hex[1]= *string++;  if (!hex[1]) badusage();
+    hex[2]= 0;
+    *out++ = strtoul(hex,&ep,16);
+    if (ep != &hex[2]) badusage();
+  }
 }
 
 int main(int argc, const char *const *argv) {
   uid_t uid;
-  char fnbuf[100];
+  char fnbuf[300];
   char *ep;
   const char *np;
-  unsigned long addr, port, haddr, thaddr, thmask;
+  const char *tophalfchar="";
+  unsigned long port, addr4=0, haddr4=0;
   unsigned int hport, a1,a2,a3,a4, alen,pmin,pmax;
-  int nchar;
+  int nchar, af;
   FILE *file;
 
-  if (argc != 3) badusage(); 
-  addr= strtoul(argv[1],&ep,16); if (*ep || addr&~0x0ffffffffUL) badusage();
+  if (argc == 3) {
+    af= AF_INET;
+    saddr_any= (void*)&saddr4;
+    saddrlen_any= sizeof(saddr4);
+    addr_any= &saddr4.sin_addr.s_addr;
+    addrlen_any= sizeof(saddr4.sin_addr.s_addr);
+    addr4= strtoul(argv[1],&ep,16);
+    if (*ep || addr4&~0x0ffffffffUL) badusage();
+    haddr4= ntohl(addr4);
+  } else if (argc == 4 && !strcmp(argv[3],"6")) {
+    af= AF_INET6;
+    saddr_any= (void*)&saddr6;
+    saddrlen_any= sizeof(saddr6);
+    addr_any= &saddr6.sin6_addr.s6_addr;
+    addrlen_any= sizeof(saddr6.sin6_addr.s6_addr);
+    hex2bytes(argv[1], saddr6.sin6_addr.s6_addr,
+	      sizeof(saddr6.sin6_addr.s6_addr));
+  } else {
+    badusage();
+    abort();
+  }
+
   port= strtoul(argv[2],&ep,16); if (*ep || port&~0x0ffffUL) badusage();
   hport= htons(port);
-  if (hport >= IPPORT_RESERVED/2) _exit(EPERM);
+  if (hport >= IPPORT_RESERVED/2) tophalfchar= "!";
 
   if (chdir(CONFIGDIR)) perrorfail("chdir " CONFIGDIR);
 
   fnbuf[sizeof(fnbuf)-1]= 0;
-  memset(&saddr4,0,sizeof(saddr4));
-  saddr4.sin_family= AF_INET;
-  saddr4.sin_port= port;
-  saddr4.sin_addr.s_addr= addr;
 
-  snprintf(fnbuf,sizeof(fnbuf)-1,"byport/%u",hport);
+  switch (af) {
+  case AF_INET:
+    saddr4.sin_family= af;
+    saddr4.sin_port= port;
+    saddr4.sin_addr.s_addr= addr4;
+    break;
+  case AF_INET6:
+    saddr6.sin6_family= af;
+    saddr6.sin6_port= port;
+    break;
+  default:
+    abort();
+  }
+
+  snprintf(fnbuf,sizeof(fnbuf)-1,"byport/%s%u",tophalfchar,hport);
   if (!access(fnbuf,X_OK)) authorised();
   if (errno != ENOENT) exiterrno(errno);
 
-  np= inet_ntoa(saddr4.sin_addr); assert(np);
-  snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s:%u",np,hport);
+  char npbuf[INET_ADDRSTRLEN + INET6_ADDRSTRLEN];
+  np= inet_ntop(af,addr_any,npbuf,addrlen_any);
+  assert(np);
+
+  snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s:%s%u",np,tophalfchar,hport);
   if (!access(fnbuf,X_OK)) authorised();
   if (errno != ENOENT) exiterrno(errno);
 
   uid= getuid(); if (uid==(uid_t)-1) perrorfail("getuid");
-  snprintf(fnbuf,sizeof(fnbuf)-1,"byuid/%lu",(unsigned long)uid);
+  snprintf(fnbuf,sizeof(fnbuf)-1,"byuid/%s%lu",tophalfchar,(unsigned long)uid);
 
   file= fopen(fnbuf,"r");
   if (!file) exiterrno(errno==ENOENT ? EPERM : errno);
 
-  haddr= ntohl(addr);
-
   while (fgets(fnbuf,sizeof(fnbuf)-1,file)) {
     nchar= -1;
-    sscanf(fnbuf," %u.%u.%u.%u/%u:%u,%u %n",
-	   &a1,&a2,&a3,&a4,&alen,&pmin,&pmax,&nchar);
-    if (nchar != strlen(fnbuf) ||
-	alen>32 || pmin&~0x0ffff || pmax&~0x0ffff ||
-	a1&~0x0ff || a2&~0xff || a3&~0x0ff || a4&~0x0ff)
+
+    char *colon = strchr(fnbuf,'/');
+    if (!colon) continue;
+    *colon++ = '\0';
+
+    sscanf(fnbuf," %u.%u.%u.%u/%u%n",
+	   &a1,&a2,&a3,&a4,&alen,&nchar);
+    if (nchar == strlen(fnbuf)) {
+      if (alen>32 || pmin&~0x0ffff || pmax&~0x0ffff ||
+	  a1&~0x0ff || a2&~0xff || a3&~0x0ff || a4&~0x0ff)
+	continue;
+
+      unsigned long thaddr, thmask;
+      thaddr= (a1<<24)|(a2<<16)|(a3<<8)|(a4);
+      thmask= 0x0ffffffffUL<<(32-alen);
+      if ((haddr4&thmask) != thaddr) continue;
+    } else {
+      char *hyphen = strchr(fnbuf,'-');
+      const char *min, *max;
+      if (hyphen) {
+	*hyphen++ = '\0';
+	min = fnbuf;
+	max = hyphen;
+      } else {
+	min = fnbuf;
+	max = fnbuf;
+      }
+      unsigned char minaddr[addrlen_any];
+      unsigned char maxaddr[addrlen_any];
+      if (inet_pton(af,min,minaddr) != 1 ||
+	  inet_pton(af,max,maxaddr) != 1)
+        continue;
+      if (memcmp(addr_any,minaddr,addrlen_any) < 0 ||
+	  memcmp(addr_any,maxaddr,addrlen_any) > 0)
+        continue;
+    }
+
+    sscanf(colon," %u,%u %n",
+	   &pmin,&pmax,&nchar);
+    if (nchar != strlen(colon))
       continue;
     
     if (hport<pmin || hport>pmax) continue;
 
-    thaddr= (a1<<24)|(a2<<16)|(a3<<8)|(a4);
-    thmask= 0x0ffffffffUL<<(32-alen);
-    if ((haddr&thmask) != thaddr) continue;
     authorised();
   }
   if (ferror(file)) perrorfail("read per-uid file");
