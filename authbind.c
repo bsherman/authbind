@@ -27,14 +27,12 @@
 
 #include "authbind.h"
 
-static const char *rcsid="$Id$";
-
 static void printusage(FILE *f) {
   if (fprintf(f,
 	      "usage:       authbind [<options>] <program> <arg> <arg> ...\n"
 	      "options:     --deep    --depth <levels>\n"
-	      "version:     " MAJOR_VER "." MINOR_VER "  %s\n",
-	      rcsid) == EOF) { perror("printf usage"); exit(-1); }
+	      "version:     " MAJOR_VER "." MINOR_VER "\n")
+      == EOF) { perror("printf usage"); exit(-1); }
 }
 
 static void usageerror(const char *msg) {

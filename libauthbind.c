@@ -31,8 +31,6 @@
 #include <sys/wait.h>
 #include <netinet/in.h>
 
-static const char *rcsid="$Id$";
-
 #include "authbind.h"
 
 typedef void anyfn_type(void);
@@ -205,9 +203,7 @@ int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
     execl(HELPER,HELPER,addrarg,portarg,afarg,(char*)0);
     status= errno > 0 && errno < 127 ? errno : 127;
     STDERRSTR_CONST("libauthbind: possible installation problem - "
-		    "could not invoke " HELPER " (");
-    STDERRSTR_STRING(rcsid);
-    STDERRSTR_CONST(")\n");
+		    "could not invoke " HELPER "\n");
     exiterrno(status);
   }
 

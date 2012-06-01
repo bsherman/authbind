@@ -34,8 +34,6 @@
 # define CONFIGDIR "/etc/authbind"
 #endif
 
-static const char *rcsid="$Id$";
-
 static void exiterrno(int e) {
   exit(e>0 && e<128 ? e : ENOSYS);
 }
@@ -48,7 +46,7 @@ static void perrorfail(const char *m) {
 }
 
 static void badusage(void) {
-  fprintf(stderr,"libauthbind's helper: bad usage\n (%s)\n",rcsid);
+  fprintf(stderr,"libauthbind's helper: bad usage\n");
   exit(ENOSYS);
 }
 

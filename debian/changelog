@@ -1,4 +1,4 @@
-authbind (2.0.0) unstable; urgency=medium
+authbind (2.0.0~~iwj) unstable; urgency=medium
 
   * Support IPv6.  (Closes: #596921.)
   * Support ports 512-1023 if the user really wants.
@@ -9,7 +9,7 @@ authbind (2.0.0) unstable; urgency=medium
   * Set Priority to optional as in ftpmaster override file.
   * Upstream repo is now in git.
 
- --
+ -- Ian Jackson <ian@zealot.relativity.greenend.org.uk>  Sat, 02 Jun 2012 00:05:29 +0100
 
 authbind (1.2.0) unstable; urgency=low
 
@@ -123,7 +123,3 @@ authbind (0.1-1) experimental; urgency=low
   * Initial release.
 
  -- Ian Jackson <ian@davenant.greenend.org.uk>  Sat, 29 Aug 1998 20:10:37 +0100
-
-Local variables:
-mode: debian-changelog
-End:
