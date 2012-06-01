@@ -48,7 +48,11 @@ leading
 .BR 0x ,
 of exactly the right length (8 and 4 digits, respectively), being
 a pairs of hex digits for each byte in the address or port number when
-expressed in network byte order.
+expressed in host byte order.  For example, the port argument is the
+result of something like
+.B sprintf(arg,
+.B """%04X"",
+.BR sin.sin_port) .
 .PP
 .B helper
 will not bind to ports 512 and onwards, because programs like
