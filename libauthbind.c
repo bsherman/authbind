@@ -164,7 +164,7 @@ int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
     goto bail;
   }
 
-  if (!geteuid() || portval == 0 || portval >= IPPORT_RESERVED) {
+  if (!geteuid() || portval == 0 || ntohs(portval) >= IPPORT_RESERVED) {
   bail:
     return old_bind(fd,addr,addrlen);
   }

@@ -134,7 +134,7 @@ int main(int argc, const char *const *argv) {
   if (errno != ENOENT) exiterrno(errno);
 
   char npbuf[INET_ADDRSTRLEN + INET6_ADDRSTRLEN];
-  np= inet_ntop(af,addr_any,npbuf,addrlen_any);
+  np= inet_ntop(af,addr_any,npbuf,sizeof(npbuf));
   assert(np);
 
   if (af == AF_INET) {
