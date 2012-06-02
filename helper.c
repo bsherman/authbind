@@ -148,9 +148,19 @@ int main(int argc, const char *const *argv) {
   if (errno != ENOENT) exiterrno(errno);
 
   if (af == AF_INET6) {
-    char sbuf[addrlen_any*2+1];
-    bytes2hex(addr_any,sbuf,addrlen_any);
+    char sbuf[addrlen_any*3+1], *sp = sbuf;
+    const unsigned char *ip = addr_any;
+    int i;
+    for (i=0; i<8; i++) {
+      unsigned val = 0;
+      val |= *ip++;  val <<= 8;
+      val |= *ip++;
+      if (i) *sp++ = ':';
+      sp += sprintf(sp,"%x",val);
+    }
     snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s%s,%u",tophalfchar,sbuf,hport);
+    if (!access(fnbuf,X_OK)) authorised();
+    if (errno != ENOENT) exiterrno(errno);
   }
 
   uid= getuid(); if (uid==(uid_t)-1) perrorfail("getuid");
@@ -161,10 +171,11 @@ int main(int argc, const char *const *argv) {
 
   while (fgets(fnbuf,sizeof(fnbuf)-1,file)) {
     unsigned int a1,a2,a3,a4, alen,pmin,pmax;
-    int nchar= -1;
+    int nchar;
 
     if (af == AF_INET &&
-	(sscanf(fnbuf," %u.%u.%u.%u/%u: %u,%u %n",
+	(nchar = -1,
+	 sscanf(fnbuf," %u.%u.%u.%u/%u: %u,%u %n",
 		&a1,&a2,&a3,&a4,&alen,&pmin,&pmax,&nchar),
 	 nchar == strlen(fnbuf))) {
 
@@ -180,7 +191,7 @@ int main(int argc, const char *const *argv) {
     } else {
 
       char *comma = strchr(fnbuf,',');
-      if (comma) continue;
+      if (!comma) continue;
       *comma++ = '\0';
 
       char *hyphen = strchr(fnbuf,'-');
@@ -202,6 +213,7 @@ int main(int argc, const char *const *argv) {
 	  memcmp(addr_any,maxaddr,addrlen_any) > 0)
 	continue;
 
+      nchar = -1;
       sscanf(comma," %u-%u %n",
 	     &pmin,&pmax,&nchar);
       if (nchar != strlen(comma))

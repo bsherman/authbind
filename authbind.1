@@ -86,10 +86,14 @@ Secondly, if that test fails to resolve the matter,
 (any protocol) or failing that
 .BI /etc/authbind/byaddr/ addr : port
 (IPv4 only)
-is tested, in the same manner as above.  (Here
+is tested, in the same manner as above.  Here
 .I addr
 is as from
-.BR inet_ntop .)
+.BR inet_ntop .
+Since this is not completely predictable for IPv6,
+for IPv6 a variant of
+.I addr
+is also tested which does not contain any ommitted zeroes or colons.
 .PP
 Thirdly, if the question is still unresolved, the file
 .BI /etc/authbind/byuid/ uid
