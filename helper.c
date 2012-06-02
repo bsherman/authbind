@@ -30,9 +30,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#ifndef CONFIGDIR
-# define CONFIGDIR "/etc/authbind"
-#endif
+#include "authbind.h"
 
 static void exiterrno(int e) {
   exit(e>0 && e<128 ? e : ENOSYS);
@@ -138,14 +136,20 @@ int main(int argc, const char *const *argv) {
   assert(np);
 
   if (af == AF_INET) {
-    snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s%s:%u",np,tophalfchar,hport);
+    snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s%s:%u",tophalfchar,np,hport);
     if (!access(fnbuf,X_OK)) authorised();
     if (errno != ENOENT) exiterrno(errno);
   }
 
-  snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s%s,%u",np,tophalfchar,hport);
+  snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s%s,%u",tophalfchar,np,hport);
   if (!access(fnbuf,X_OK)) authorised();
   if (errno != ENOENT) exiterrno(errno);
+
+  if (af == AF_INET6) {
+    char sbuf[addrlen_any*2+1];
+    bytes2hex(addr_any,sbuf,addrlen_any);
+    snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s%s,%u",tophalfchar,sbuf,hport);
+  }
 
   uid= getuid(); if (uid==(uid_t)-1) perrorfail("getuid");
   snprintf(fnbuf,sizeof(fnbuf)-1,"byuid/%s%lu",tophalfchar,(unsigned long)uid);
