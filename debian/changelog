@@ -1,4 +1,4 @@
-authbind (2.0.0~~iwj) unstable; urgency=medium
+authbind (2.0.0) unstable; urgency=medium
 
   Important new functionality:
   * Support IPv6.  (Closes: #596921.)
@@ -18,7 +18,7 @@ authbind (2.0.0~~iwj) unstable; urgency=medium
   * Change my email address.
   * Set Priority to optional as in ftpmaster override file.
 
- -- Ian Jackson <ijackson@chiark.greenend.org.uk>  Sat, 02 Jun 2012 00:26:54 +0100
+ -- Ian Jackson <ijackson@chiark.greenend.org.uk>  Sat, 02 Jun 2012 01:56:37 +0100
 
 authbind (1.2.0) unstable; urgency=low
 
