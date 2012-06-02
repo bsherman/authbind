@@ -62,6 +62,11 @@ static void authorised(void) {
   else _exit(0);
 }
 
+static void checkexecflagfile(const char *file) {
+  if (!access(file,X_OK)) authorised();
+  if (errno != ENOENT) exiterrno(errno);
+}
+
 static void hex2bytes(const char *string, unsigned char *out, int len) {
   int i;
   for (i=0; i<len; i++) {
@@ -139,13 +144,11 @@ int main(int argc, const char *const *argv) {
 
   if (af == AF_INET) {
     snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s%s:%u",tophalfchar,np,hport);
-    if (!access(fnbuf,X_OK)) authorised();
-    if (errno != ENOENT) exiterrno(errno);
+    checkexecflagfile(fnbuf);
   }
 
   snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s%s,%u",tophalfchar,np,hport);
-  if (!access(fnbuf,X_OK)) authorised();
-  if (errno != ENOENT) exiterrno(errno);
+  checkexecflagfile(fnbuf);
 
   if (af == AF_INET6) {
     char sbuf[addrlen_any*3+1], *sp = sbuf;
@@ -159,8 +162,7 @@ int main(int argc, const char *const *argv) {
       sp += sprintf(sp,"%x",val);
     }
     snprintf(fnbuf,sizeof(fnbuf)-1,"byaddr/%s%s,%u",tophalfchar,sbuf,hport);
-    if (!access(fnbuf,X_OK)) authorised();
-    if (errno != ENOENT) exiterrno(errno);
+    checkexecflagfile(fnbuf);
   }
 
   uid= getuid(); if (uid==(uid_t)-1) perrorfail("getuid");
