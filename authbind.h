@@ -30,18 +30,8 @@
 # define HELPER "/usr/local/lib/authbind/helper"
 #endif
 
-#ifndef CONFIGDIR
-# define CONFIGDIR "/etc/authbind"
-#endif
-
 #define PRELOAD_VAR "LD_PRELOAD"
 #define AUTHBINDLIB_VAR "AUTHBIND_LIB"
 #define AUTHBIND_LEVELS_VAR "AUTHBIND_LEVELS"
-
-static inline void bytes2hex(const unsigned char *in, char *out, size_t len) {
-  size_t i;
-  for (i=0; i<16; i++)
-    sprintf(out+i*2,"%02x", in[i]);
-}
 
 #endif

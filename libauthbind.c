@@ -185,7 +185,9 @@ int bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
     break;
   case AF_INET6:
     afarg = "6";
-    bytes2hex(((struct sockaddr_in6*)addr)->sin6_addr.s6_addr, addrarg, 16);
+    for (i=0; i<16; i++)
+      sprintf(addrarg+i*2,"%02x",
+	      ((struct sockaddr_in6*)addr)->sin6_addr.s6_addr[i]);
     break;
   default:
     abort();

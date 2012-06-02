@@ -30,7 +30,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "authbind.h"
+#ifndef CONFIGDIR
+# define CONFIGDIR "/etc/authbind"
+#endif
 
 static void exiterrno(int e) {
   exit(e>0 && e<128 ? e : ENOSYS);
