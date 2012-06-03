@@ -89,13 +89,22 @@ Secondly, if that test fails to resolve the matter,
 is tested, in the same manner as above.  Here
 .I addr
 is as from
-.BR inet_ntop .
-Since this is not completely predictable for IPv6,
-for IPv6 a variant of
-.I addr
-is also tested which does not contain any ommitted zeroes or colons.
+.BR inet_ntop ,
+and
+.I port
+is the (local) TCP or UDP port number, expressed as an unsigned
+integer in the minimal non-zero number of digits.
 .PP
-Thirdly, if the question is still unresolved, the file
+Thirdly, for IPv6 only: since the textual representation from
+.B inet_ntop
+is complicated to predict, a variant of
+.I addr
+is also tested which does not use the double colon abbreviation:
+each 16-byte chunk expressed in the minimal nonzero number
+of hex digits (i.e. with leading zeroes removed), the chunks
+being separated by colons as is conventional.
+.PP
+Fourthly, if the question is still unresolved, the file
 .BI /etc/authbind/byuid/ uid
 will be opened and read.  If the file does not exist then the binding
 is not authorised and
@@ -130,12 +139,6 @@ will fail with
 .B ENOENT
 .RI ( "No such file or directory" ).
 .PP
-In each case above,
-.TP
-.I port
-is the (local) TCP or UDP port number, expressed as an unsigned
-integer in the minimal non-zero number of digits, and
-.PP
 If a read error occurs, or the directory
 .B /etc/authbind
 cannot be accessed, then not only will
@@ -144,10 +147,10 @@ fail, but an error message will be printed to stderr.  Unrecognised
 lines in
 .BI /etc/authbind/byuid/ uid
 files are silently ignored (as are lines whose
-.I addr4
+.I addr
 has non-zero bits more than
 .I length
-from the top) or where
+from the top) or where some
 .I min
 is larger than
 .IR max .

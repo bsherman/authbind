@@ -45,17 +45,23 @@ the caller desires that the socket be bound, and the address family
 (ommitted for IPv4; the fixed string
 .B 6
 for IPv6).
-The address and port should be hex strings,
+.I addr4-hex
+and
+.I port-hex
+should be hex strings,
 .I without
 leading
 .BR 0x ,
-of exactly the right length (8 or 32, and 4, digits, respectively), being
-a pairs of hex digits for each byte in the address or port number when
+of exactly the right length (8 and 4 digits, respectively), being
+a pair of hex digits for each byte in the address or port number when
 expressed in host byte order.  For example, the port argument is the
 result of something like
 .B sprintf(arg,
 .B """%04X"",
 .BR sin.sin_port) .
+.I addr6-hex
+should be a string of 32 hex digits, being a pair for each byte in
+the address, in network byte order.
 .SH EXIT STATUS
 .B helper
 will exit with code 0 on success.
