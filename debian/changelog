@@ -1,3 +1,12 @@
+authbind (2.0.1) unstable; urgency=low
+
+  Bugfix:
+  * 0-length ipv4 address masks (ie, 0.0.0.0/0) in byuid files wouldn't
+    work because they would attempt a 32-bit shift.  This was reported
+    against Ubuntu in Launchpad but the but is here too.  LP: #514278.
+
+ -- Ian Jackson <ijackson@chiark.greenend.org.uk>  Sun, 03 Jun 2012 01:50:13 +0100
+
 authbind (2.0.0) unstable; urgency=medium
 
   Important new functionality:

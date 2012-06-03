@@ -187,7 +187,7 @@ int main(int argc, const char *const *argv) {
 
       unsigned long thaddr, thmask;
       thaddr= (a1<<24)|(a2<<16)|(a3<<8)|(a4);
-      thmask= 0x0ffffffffUL<<(32-alen);
+      thmask= alen ? 0x0ffffffffUL<<(32-alen) : 0;
       if ((haddr4&thmask) != thaddr) continue;
 
     } else {
