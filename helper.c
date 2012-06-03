@@ -196,30 +196,68 @@ int main(int argc, const char *const *argv) {
       if (!comma) continue;
       *comma++ = '\0';
 
+      char *slash = strchr(fnbuf,'/');
       char *hyphen = strchr(fnbuf,'-');
-      const char *min, *max;
-      if (hyphen) {
-	*hyphen++ = '\0';
-	min = fnbuf;
-	max = hyphen;
-      } else {
-	min = fnbuf;
-	max = fnbuf;
-      }
-      unsigned char minaddr[addrlen_any];
-      unsigned char maxaddr[addrlen_any];
-      if (inet_pton(af,min,minaddr) != 1 ||
-	  inet_pton(af,max,maxaddr) != 1)
-	continue;
-      if (memcmp(addr_any,minaddr,addrlen_any) < 0 ||
-	  memcmp(addr_any,maxaddr,addrlen_any) > 0)
+
+      if (slash && hyphen)
 	continue;
 
-      nchar = -1;
-      sscanf(comma," %u-%u %n",
-	     &pmin,&pmax,&nchar);
-      if (nchar != strlen(comma))
+      if (slash) {
+	int alen;
+	*slash++ = '\0';
+	nchar = -1;
+	sscanf(slash," %u %n",&alen,&nchar);
+	if (nchar != strlen(slash))
+	  continue;
+	unsigned char thaddr[addrlen_any];
+	if (inet_pton(af,fnbuf,thaddr) != 1)
+	  continue;
+	int pfxlen_remain = alen;
+	int i;
+	for (i=0; i<addrlen_any; i++) {
+	  int pfxlen_thisbyte = pfxlen_remain < 8 ? pfxlen_remain : 8;
+	  pfxlen_remain -= pfxlen_thisbyte;
+	  unsigned mask_thisbyte = 0xff ^ (0xff >> pfxlen_thisbyte);
+	  unsigned thaddr_thisbyte = thaddr[i];
+	  unsigned addr_thisbyte = ((unsigned char*)addr_any)[i];
+	  if ((addr_thisbyte & mask_thisbyte) != thaddr_thisbyte)
+	    goto badline;
+	}
+	if (pfxlen_remain) badline: continue;
+	/* hooray */
+      } else {
+	const char *min, *max;
+	if (hyphen) {
+	  *hyphen++ = '\0';
+	  min = fnbuf;
+	  max = hyphen;
+	} else {
+	  min = fnbuf;
+	  max = fnbuf;
+	}
+	unsigned char minaddr[addrlen_any];
+	unsigned char maxaddr[addrlen_any];
+	if (inet_pton(af,min,minaddr) != 1 ||
+	    inet_pton(af,max,maxaddr) != 1)
+	  continue;
+	if (memcmp(addr_any,minaddr,addrlen_any) < 0 ||
+	    memcmp(addr_any,maxaddr,addrlen_any) > 0)
+	  continue;
+      }
+
+      if (nchar = -1,
+	  sscanf(comma," %u-%u %n",
+		 &pmin,&pmax,&nchar),
+	  nchar == strlen(comma)) {
+	/* good */
+      } else if (nchar = -1,
+		 sscanf(comma," %u %n",
+			&pmin,&nchar),
+		 nchar == strlen(comma)) {
+	pmax = pmin;
+      } else {
 	continue;
+      }
 
     }
     if (hport<pmin || hport>pmax) continue;

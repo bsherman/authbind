@@ -105,21 +105,23 @@ will return
 .RI ( "Operation not permitted" ", or " "Not owner" ).
 If the file does exist it will be searched for a line of the form
 .nf
-.IR		addrmin [\fB\-\fR addrmax ]\fB,\fR portmin \fB\-\fR portmax
+.IR		addrmin [\fB\-\fR addrmax ]\fB,\fR portmin [\fB\-\fR portmax ]
+.IR		addr [\fB/\fR length ]\fB,\fR portmin [\fB\-\fR portmax ]
 .IB		addr4 / length : portmin , portmax
 .fi
 matching the request.
 The first form requires that the address lies in the
 relevant range (inclusive at both ends).
-The second form requires that the initial
+The second and third forms require that the initial
 .I length
 bits of
 .I addr
 match those in the proposed
 .B bind
-call and is only available for IPv4.
-Addresses can
-be in any form acceptable to inet_pton.  In both cases
+call.  The third form is only available for IPv4 since IPv6 addresses
+contain colons.
+Addresses in the byuid file can
+be in any form acceptable to inet_pton.  In all cases
 the proposed port number must lie is in the inclusive range
 specified.  If such a line is found then the binding is authorised.
 Otherwise it is not, and
