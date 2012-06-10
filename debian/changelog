@@ -1,3 +1,10 @@
+authbind (2.1.1) unstable; urgency=low
+
+  * Manpage has an example of which files will be checked for IPv6.
+    Closes: #676540.
+
+ --
+
 authbind (2.1.0) unstable; urgency=low
 
   * Permissions file lines can contain IPv6 mask/length.

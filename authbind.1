@@ -104,6 +104,16 @@ each 16-byte chunk expressed in the minimal nonzero number
 of hex digits (i.e. with leading zeroes removed), the chunks
 being separated by colons as is conventional.
 .PP
+So for example an attempt to bind to [2620:106:e002:f00f::21]:80
+would result in authbind calling
+.I access(2)
+on
+.B /etc/authbind/byport/80
+and then
+.B /etc/authbind/byaddr/2620:106:e002:f00f::21,80
+and then
+.BR /etc/authbind/byaddr/2620:106:e002:f00f:0:0:0:21,80 .
+.PP
 Fourthly, if the question is still unresolved, the file
 .BI /etc/authbind/byuid/ uid
 will be opened and read.  If the file does not exist then the binding
