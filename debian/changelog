@@ -1,3 +1,9 @@
+authbind (2.1.2~~iwj) unstable; urgency=low
+
+  * Fix one-letter typo in previous changelog entry.
+
+ --
+
 authbind (2.1.1) unstable; urgency=low
 
   * Manpage has an example of which files will be checked and read
@@ -6,7 +12,7 @@ authbind (2.1.1) unstable; urgency=low
     library and package version numbers are not the same, so this is
     misleading, and we do not want to introduce new machinery just to
     plumb the package version number through.  Closes: #676440.
-  * Another minor wording fix in the manpage.x
+  * Another minor wording fix in the manpage.
 
  -- Ian Jackson <ijackson@chiark.greenend.org.uk>  Sun, 10 Jun 2012 23:17:14 +0100
 
