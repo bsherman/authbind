@@ -1,6 +1,6 @@
 authbind (2.1.1) unstable; urgency=low
 
-  * Manpage has an example of which files will be checked for IPv6.
+  * Manpage has an example of which files will be checked and read
     Closes: #676540.
 
  --
