@@ -1,4 +1,4 @@
-authbind (2.1.1~~iwj) unstable; urgency=low
+authbind (2.1.1) unstable; urgency=low
 
   * Manpage has an example of which files will be checked and read
     Closes: #676540.
@@ -8,7 +8,7 @@ authbind (2.1.1~~iwj) unstable; urgency=low
     plumb the package version number through.  Closes: #676440.
   * Another minor wording fix in the manpage.x
 
- -- Ian Jackson <ijackson@chiark.greenend.org.uk>  Sun, 10 Jun 2012 22:49:48 +0100
+ -- Ian Jackson <ijackson@chiark.greenend.org.uk>  Sun, 10 Jun 2012 23:17:14 +0100
 
 authbind (2.1.0) unstable; urgency=low
 
