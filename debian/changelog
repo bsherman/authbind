@@ -6,6 +6,7 @@ authbind (2.1.1~~iwj) unstable; urgency=low
     library and package version numbers are not the same, so this is
     misleading, and we do not want to introduce new machinery just to
     plumb the package version number through.  Closes: #676440.
+  * Another minor wording fix in the manpage.x
 
  -- Ian Jackson <ijackson@chiark.greenend.org.uk>  Sun, 10 Jun 2012 22:49:48 +0100
 
