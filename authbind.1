@@ -139,8 +139,24 @@ will fail with
 .B ENOENT
 .RI ( "No such file or directory" ).
 .PP
+If a read error occurs, or the directory
+.B /etc/authbind
+cannot be accessed, then not only will
+.B bind
+fail, but an error message will be printed to stderr.  Unrecognised
+lines in
+.BI /etc/authbind/byuid/ uid
+files are silently ignored, as are lines whose
+.I addr
+has non-zero bits more than
+.I length
+from the top or where some
+.I min
+is larger than
+.IR max .
+.SH EXAMPLE
 So for example an attempt by uid 432
-to bind to [2620:106:e002:f00f::21]:80
+to bind to port 80 of address [2620:106:e002:f00f::21]
 would result in authbind calling
 .I access(2)
 on, in order,
@@ -162,29 +178,15 @@ the relevant access; examples of lines which would do so are:
 .br
 .B ::/0,80
 .RE
-.PP
-If a read error occurs, or the directory
-.B /etc/authbind
-cannot be accessed, then not only will
-.B bind
-fail, but an error message will be printed to stderr.  Unrecognised
-lines in
-.BI /etc/authbind/byuid/ uid
-files are silently ignored, as are lines whose
-.I addr
-has non-zero bits more than
-.I length
-from the top or where some
-.I min
-is larger than
-.IR max .
-.PP
+.SH PORTS 512-1023
 Authorising binding to ports from 512 to 1023 inclusive is
 not recommended.  Some protocols (including some versions of NFS)
 authorise clients by seeing that they are using a port number in this
 range.  So by authorising a program to be a server for such a port,
 you are also authorising it to impersonate the whole host for those
-protocols.  To make sure that this isn't done by accident,
+protocols.
+
+To make sure that this isn't done by accident,
 if the port number requested is in the range 512-1023, authbind
 will expect the permission files to have an additional
 .B !
