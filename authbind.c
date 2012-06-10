@@ -30,8 +30,7 @@
 static void printusage(FILE *f) {
   if (fprintf(f,
 	      "usage:       authbind [<options>] <program> <arg> <arg> ...\n"
-	      "options:     --deep    --depth <levels>\n"
-	      "version:     " MAJOR_VER "." MINOR_VER "\n")
+	      "options:     --deep    --depth <levels>\n")
       == EOF) { perror("printf usage"); exit(-1); }
 }
 
