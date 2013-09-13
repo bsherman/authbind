@@ -6,8 +6,8 @@ Summary: Allows non-root programs to bind() to low ports
 Group: Net/Utils
 License: GPL
 Packager: Benjamin Sherman <benjamin@jivesoftware.com>
-URL: https://launchpad.net/ubuntu/+source/authbind/2.1.1
-Source: https://launchpad.net/ubuntu/+archive/primary/+files/authbind_2.1.1.tar.gz
+URL: http://en.wikipedia.org/wiki/Authbind
+Source: http://www.chiark.greenend.org.uk/ucgi/~ian/git/authbind.git
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires: gcc
@@ -19,7 +19,7 @@ still bind to low ports, without any changes to the application.
 http://en.wikipedia.org/wiki/Authbind
 
 
-%prep 
+%prep
 %setup -n authbind-2.1.1
 sed -i -e "s/^prefix=.*$/prefix=$\{DESTDIR\}\/usr/" Makefile
 sed -i -e "s/^etc_dir=/etc_dir=$\{DESTDIR\}/" Makefile
