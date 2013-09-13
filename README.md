@@ -10,4 +10,5 @@ http://en.wikipedia.org/wiki/Authbind
 This github repo is a clone of the official repo: 
   http://www.chiark.greenend.org.uk/ucgi/~ian/git/authbind.git/
 
-This version has an added SPEC file for building RPM.
+The bsherman clone of the codebased maintains an RPM SPEC file
+in the rpm branch.
